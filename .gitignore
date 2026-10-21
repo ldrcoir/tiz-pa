@@ -1,0 +1,18 @@
+# godot
+game/.godot/
+
+# بیلد و خروجی‌ها
+build/
+download/
+upload/
+docs/
+
+# ابزارها و چیزهای لوکال
+tools/
+scripts/
+skills/
+keys/
+
+# سیستمی
+*.tmp
+.DS_Store
