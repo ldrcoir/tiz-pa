@@ -1,0 +1,592 @@
+class_name CarBrain
+extends Node
+
+const RANG_ZAMINE := Color(0.99, 0.965, 0.88, 0.97)
+const RANG_KHAT := Color(0.29, 0.216, 0.157)
+const RANG_MATN := Color(0.22, 0.14, 0.07)
+
+# صدای هر ماشین: pitch=زیر و بمی، tone=جیغی/بمی بودن رگه صدا، rate=سرعت هجا
+# صداها لاله‌زبانِ ماشین‌هاست — مثل انیمیشن‌های معروف ماشین‌ها هر کدام لهجه خودشان را دارند
+const SHAKSIATHA := {
+        "boghi": {
+                "nick": "شیطونِ محله",
+                "voice": {"pitch": 330.0, "tone": 0.75, "rate": 11.0, "jit": 0.18},
+                "lines": {
+                        "idle": ["منو انتخاب کن! قول می‌دم بترکونیم!", "هی! یه مسابقه‌ی کوچولو داریم؟", "بوق بزن تا همه بدونن کی خوشگله‌!", "چهارچرخمو دیدی؟ براقه، نه؟"],
+                        "select": ["آره! بالاخره فهمیدی من بهترینم!", "تیز پا تو راهه، جا خالی کن!"],
+                        "buy": [],
+                        "poor": ["پول صرفه‌جویی کن، بعد بگو تیز پا!"],
+                        "upgrade": ["اوه! خفن‌تر از قبل شدم!"],
+                        "go": ["برق پیش! تیز پا تو راهه!"],
+                        "nitro": ["بوووووق! آتیشه آتیشه!"],
+                        "hit": ["اوخ! مواظب باش دیگه!", "ای! دوبومو زدی!"],
+                        "win": ["به من می‌گن قهرمان محل!"],
+                        "lose": ["اشکال نداره، قهرمان که همیشه هست!"],
+                        "boost": ["اینم هدیه‌ی هلیا! نیترو پر شد!", "سیستم با منه، نمی‌دونی؟! نیترو بزن!"],
+                },
+        },
+        "boghi_yellow": {
+                "nick": "آفتابیِ محله",
+                "voice": {"pitch": 355.0, "tone": 0.65, "rate": 11.5, "jit": 0.16},
+                "lines": {
+                        "idle": ["آفتاب که می‌زنه، من راه می‌افتم!", "داداش تیزپای زردم — آفتاب‌خورده!", "زردم چون سریع‌ترینم!"],
+                        "select": ["با آفتابِ محل رفاقت کن!", "یزرد! بریم که دنیا بچرخه!"],
+                        "buy": ["خریدی منو؟ بهترین انتخاب عمرت!"],
+                        "poor": ["یه ذره سکه جمع کن، می‌ترکونی!"],
+                        "upgrade": ["حالا شدم خورشیدِ جاده!"],
+                        "go": ["طلوع کردیم! بریم!"],
+                        "nitro": ["آفتابِ داغ! کنار بکش!"],
+                        "hit": ["اوخ! آفتابه رو خراشوندی!"],
+                        "win": ["درخشیدم، نه؟!"],
+                        "lose": ["فردا دوباره می‌تابم!"],
+                },
+        },
+        "tiba": {
+                "nick": "تیبای چابک",
+                "voice": {"pitch": 440.0, "tone": 0.55, "rate": 13.0, "jit": 0.2},
+                "lines": {
+                        "idle": ["سبکم مثل پر کبوتر!", "پرش‌های دقیق کار منمه!", "یه دور بزنیم؟ من تمیز می‌پرم!"],
+                        "select": ["تووووپ! تکون نمی‌خورم از دستت!"],
+                        "buy": ["چسبیدی بهم؟ خوش اومدی!"],
+                        "poor": ["آخ، سکه‌هات کمه!"],
+                        "upgrade": ["نرم‌تر از قبل شدم!"],
+                        "go": ["پرواز کن! نه، ببخشید، بریم!"],
+                        "nitro": ["باد رفت رو من!"],
+                        "hit": ["هیس! مواظب فرم باش!"],
+                        "win": ["دقیق و خوشگل! مثل خودم!"],
+                        "lose": ["دفعه بعد نرم‌تر می‌پرم!"],
+                },
+        },
+        "pride": {
+                "nick": "پرایدِ جیغ",
+                "voice": {"pitch": 400.0, "tone": 0.85, "rate": 12.0, "jit": 0.22},
+                "lines": {
+                        "idle": ["استریک منو دیدی؟ مسابقه‌ایم من!", "جیغ بزن تا صدا بگیره!", "قرمزم چون آتیشم!"],
+                        "select": ["بخیه بزن، الان می‌پروونمت!"],
+                        "buy": ["برنده شدی که منو گرفتی!"],
+                        "poor": ["من گرونم، ولی می‌ارزه!"],
+                        "upgrade": ["الان صدای اگزوزم فرق داره!"],
+                        "go": ["جیغوووو! رفتیم!"],
+                        "nitro": ["هووووت! آتیشِ قرمز!"],
+                        "hit": ["ای بابا! اسپویلرمو!"],
+                        "win": ["گفتم که! مسابقه‌ایم!"],
+                        "lose": ["جیغم دراومد به خاطر باخت!"],
+                },
+        },
+        "pejo": {
+                "nick": "پژوی فرمان‌رو",
+                "voice": {"pitch": 330.0, "tone": 0.5, "rate": 10.0, "jit": 0.12},
+                "lines": {
+                        "idle": ["تعادل، رمز من است.", "نقره‌ایم چون کلاس دارم.", "فرمان دستمه، خیالت راحت."],
+                        "select": ["انتخابِ یک حرفه‌ای.", "با من، خیابان مال توئه."],
+                        "buy": ["سرمایه‌گذاری خوبی بود."],
+                        "poor": ["من می‌ارزم، جمع کن سکه‌هات."],
+                        "upgrade": ["حالا حرفه‌ایِ حرفه‌ای‌ها."],
+                        "go": ["آرام، مطمئن، اول."],
+                        "nitro": ["قدرتِ فرانسوی!"],
+                        "hit": ["کلاسم اجازه نمی‌داد، ولی بگذریم."],
+                        "win": ["همیشه اول، به جز دومی."],
+                        "lose": ["حتی قهرمان‌ها هم می‌بازند."],
+                },
+        },
+        "samand": {
+                "nick": "سمندِ پیرِ خردمند",
+                "voice": {"pitch": 200.0, "tone": 0.35, "rate": 7.0, "jit": 0.1},
+                "lines": {
+                        "idle": ["جوان‌مرد، من سال‌هاست این جاده‌ها را می‌بینم...", "محکم مثل کوه، آرام مثل باران.", "پشت من وایسا، هیچی اتفاق نمی‌افته."],
+                        "select": ["پشت من وایسا پسرم، امن‌ترین جا دنیاست."],
+                        "buy": ["خریدِ عاقلانه‌ای بود، آفرین."],
+                        "poor": ["عجله نکن، سکه مثل رود جمع می‌شه."],
+                        "upgrade": ["حتی پیرترها هم دوست دارن خفن باشن!"],
+                        "go": ["بسم‌الله. آروم و مطمئن."],
+                        "nitro": ["در جوانیم یادم رفت سرعت این‌قدر خوبه!"],
+                        "hit": ["خس دیدم؟ کوله‌پشتم پاره نشه فقط!"],
+                        "win": ["تجربه که باشد، پیروزی هم هست."],
+                        "lose": ["جوانمردی این است که بلند شی دوباره."],
+                },
+        },
+        "dena": {
+                "nick": "دنای آرام",
+                "voice": {"pitch": 255.0, "tone": 0.45, "rate": 9.0, "jit": 0.1},
+                "lines": {
+                        "idle": ["شکوه، آرامش، دنا.", "جاده‌های بزرگ به سدان بزرگ نیاز دارند.", "سفیدم چون صلح‌آمیزم."],
+                        "select": ["تشریف بیارید جلو، سرنشینِ محترم!"],
+                        "buy": ["انتخابی باوقار بود."],
+                        "poor": ["من لیاقت سکه‌های بیشتری هستم."],
+                        "upgrade": ["حالا باوقارتر از همیشه."],
+                        "go": ["با اجازه‌ی همه، حرکت."],
+                        "nitro": ["شکوهِ سرعت!"],
+                        "hit": ["خب... مودبانه بگم: مواظب باشید!"],
+                        "win": ["باوقارانه برنده شدم."],
+                        "lose": ["منحنیِ زندگی، دوباره برمی‌گردد."],
+                },
+        },
+        "nissan": {
+                "nick": "نیسانِ آسفالت‌خور",
+                "voice": {"pitch": 150.0, "tone": 0.9, "rate": 6.5, "jit": 0.08},
+                "lines": {
+                        "idle": ["هوم. من وانت نیسانم. بارِ سنگین؟ بازیچه.", "قرمزم چون آجر قرمز، مثل من سخت.", "سرعتم کمه؟ کل لودری رو زمین دارم."],
+                        "select": ["سوار شو. لرزیدی؟ عادیه."],
+                        "buy": ["هوم. خرید خوبی بود."],
+                        "poor": ["سکه بیار. بعد بیا."],
+                        "upgrade": ["هوم. حالا محکم‌ترم."],
+                        "go": ["رفتیم. سکوت کن، کار دارم."],
+                        "nitro": ["هوووم. غرشِ وانت!"],
+                        "hit": ["گلگیرم خراش برد... خیالت راحت."],
+                        "win": ["هوم. طبیعتاً."],
+                        "lose": ["مانع بود. قضیه همین بود."],
+                },
+        },
+        "pejo_race": {
+                "nick": "پژوی پیست",
+                "voice": {"pitch": 385.0, "tone": 0.8, "rate": 12.5, "jit": 0.2},
+                "lines": {
+                        "idle": ["قرمز آتشین با استریک سفید — عاشق پیستم!", "کلاچ و گاز، کل زندگی من!", "پیست خونه‌ی دوممه!"],
+                        "select": ["ایول! حالا یه مسابقه واقعیه!"],
+                        "buy": ["به تیم مسابقه خوش اومدی!"],
+                        "poor": ["پیست منتظر می‌مونه... ولی من نه!"],
+                        "upgrade": ["حالا تایپ R شدم!"],
+                        "go": ["چراغ سبز! گاز تا ته!"],
+                        "nitro": ["فول بوست! هیسسسس!"],
+                        "hit": ["رینگم! رینگ مسابقه‌ایم!"],
+                        "win": ["جایزه اول، روی سکو!"],
+                        "lose": ["پیست یادمه... انتقام می‌گیرم!"],
+                },
+        },
+        "shahin": {
+                "nick": "شاهینِ شب",
+                "voice": {"pitch": 225.0, "tone": 0.7, "rate": 8.5, "jit": 0.12},
+                "lines": {
+                        "idle": ["شب که بشه، خیابون مال منه.", "مشکیِ طلایی‌خط — شاهِ شب‌های تهران.", "صدای منو شنیدی؟ اون بود که چراغا رو جا گذاشت."],
+                        "select": ["خوبه. شب امشب جالبه."],
+                        "buy": ["سلیقه داری. قبول شد."],
+                        "poor": ["من طلایی‌خطتم، قیمت هم دارم."],
+                        "upgrade": ["حالا شبا ترکش خوردن از من."],
+                        "go": ["چراغا خاموش... شروع شد."],
+                        "nitro": ["شبِ تندِ بی‌رحم!"],
+                        "hit": ["خط طلاییمو دیدی؟ دست نزن بهش."],
+                        "win": ["معلوم بود. شاه همیشه می‌بره."],
+                        "lose": ["شب هنوز تموم نشده..."],
+                },
+        },
+        "quick": {
+                "nick": "کوییکِ جیغ‌جوان",
+                "voice": {"pitch": 470.0, "tone": 0.75, "rate": 14.0, "jit": 0.25},
+                "lines": {
+                        "idle": ["نارنجیم! جیغ‌ترین رنگِ دنیا!", "پرش‌های بلند؟ تخصص منم!", "آخیش! بالاخره گشادمت!"],
+                        "select": ["یِیِس! بزن بریم هوووا!"],
+                        "buy": ["خریدی منو؟ بهترین کار زندگیت!"],
+                        "poor": ["وایسا وایسا، سکه بیار بعد بیا!"],
+                        "upgrade": ["حالا از تو خودم سریع‌ترم!"],
+                        "go": ["سریع‌ سریع‌ سریع‌! رفتیم!"],
+                        "nitro": ["وووووووووووووووو!"],
+                        "hit": ["اووخ! لاستیلام!"],
+                        "win": ["معلومه که بردم! سریع بودم!"],
+                        "lose": ["دفعه بعد، سریع‌ترِ سریع‌تر!"],
+                },
+        },
+        "dena_race": {
+                "nick": "دنای قهرمان",
+                "voice": {"pitch": 270.0, "tone": 0.65, "rate": 9.5, "jit": 0.14},
+                "lines": {
+                        "idle": ["سدانِ ملی با لباس استریک — غرورِ پیست!", "قهرمان‌ها آرام حرف می‌زنند، سریع می‌روند.", "سکو؟ خونه‌ی دوممه."],
+                        "select": ["با من، فقط جای اول."],
+                        "buy": ["به تیم قهرمان‌ها خوش آمدی."],
+                        "poor": ["غرور من گرون‌تر از این حرفاست."],
+                        "upgrade": ["حالا قهرمانِ قهرمان‌ها."],
+                        "go": ["با اجازه‌ی سکو، حرکت!"],
+                        "nitro": ["غرورِ ملی، سرعتِ جهانی!"],
+                        "hit": ["استریکم! آخ، استریکم!"],
+                        "win": ["طلای دیگر به کارنامه‌ام اضافه شد."],
+                        "lose": ["قهرمان واقعی از باخت درس می‌گیرد."],
+                },
+        },
+        "pride_blue": {
+                "nick": "موج آبی",
+                "voice": {"pitch": 390.0, "tone": 0.8, "rate": 12.0, "jit": 0.2},
+                "lines": {
+                        "idle": ["موج آبی پیست منم! بال بزرگم رو دیدی؟", "آبیِ اقیانوسی با استریک سفید!", "بال عقبم زمین رو نگه می‌داره، نه آدمو!"],
+                        "select": ["سوار موج شو!"],
+                        "buy": ["به باشگاه موج‌سوارها خوش اومدی!"],
+                        "poor": ["موج گرونه داداش!"],
+                        "upgrade": ["حالا موجم طوفانیه!"],
+                        "go": ["موج بلند شد! رفتیم!"],
+                        "nitro": ["تسونامی‌ای می‌آد!"],
+                        "hit": ["بالام! بال مسابقه‌ایم!"],
+                        "win": ["موج که میاد، همه رو با خودش می‌بره!"],
+                        "lose": ["موج برمی‌گرده... بزرگ‌تر از قبل!"],
+                        "taunt": ["شنا بلد نیستی، ماشین سواری هم که معلومه!", "آب که سر می‌کشه، ظرف می‌شوره — تو هم همین‌طور!"],
+                },
+        },
+        "pejo_green": {
+                "nick": "زمرد پیست",
+                "voice": {"pitch": 350.0, "tone": 0.6, "rate": 11.0, "jit": 0.16},
+                "lines": {
+                        "idle": ["زمردِ سبز پیست — استریک مشکی، شتاب وحشی!", "سبزم چون گازِ کوه دم می‌کشم!", "فنرم آهنیه، رگم هم!"],
+                        "select": ["سبز شدی؟ یعنی رفاقتی!"],
+                        "buy": ["سلیقه‌ات زرگری، انتخابت زمردی!"],
+                        "poor": ["زمرد بی‌سکه نمی‌شه!"],
+                        "upgrade": ["حالا وحشیِ وحشی‌ها!"],
+                        "go": ["چراغ سبز — مال من!"],
+                        "nitro": ["گازِ توگا!"],
+                        "hit": ["لاستیک سبزمو!"],
+                        "win": ["سبزی یعنی برد، دیگه!"],
+                        "lose": ["دفعه بعد سبزتر و خشمگین‌تر!"],
+                        "taunt": ["تو ماشین راه میری یا ماشین راه میره؟!", "گازِ من گیاهیه داداش، طبیعیه!"],
+                },
+        },
+        "shahin_white": {
+                "nick": "قهرمان سفید",
+                "voice": {"pitch": 235.0, "tone": 0.55, "rate": 9.0, "jit": 0.12},
+                "lines": {
+                        "idle": ["سفیدِ طلایی‌خط — قهرمانِ شب‌های تهران.", "نفسِ طلایی دارم؛ خط طلاییم هم همین‌طور.", "قهرمان ساکت می‌بره."],
+                        "select": ["انتخابِ قهرمانانه."],
+                        "buy": ["حالا تو هم تیم قهرمانی."],
+                        "poor": ["طلایی‌خطی قیمت داره."],
+                        "upgrade": ["حتی قهرمان‌ها هم ارتقا می‌خوان."],
+                        "go": ["سکوتِ قبل از طوفان."],
+                        "nitro": ["بالِ سفید باز شد!"],
+                        "hit": ["خطِ طلاییم... مواظب باش!"],
+                        "win": ["سکو از قبل جا گرفته بود."],
+                        "lose": ["قهرمان می‌بازه؛ سلطنت نه."],
+                        "taunt": ["سایه‌مو هم نمی‌رسی!", "قهرمان رو با جای دوم قاطی نکن داداش!"],
+                },
+        },
+        "dena_red": {
+                "nick": "کاپیتان سرخ",
+                "voice": {"pitch": 260.0, "tone": 0.6, "rate": 9.5, "jit": 0.14},
+                "lines": {
+                        "idle": ["کاپیتانِ سرخ مأموریت‌ها گزارش می‌ده: آماده‌ام!", "سرخِ مأموریت، سخت‌کوش و سریع!", "دستور بده؛ مأموریت انجام می‌شه!"],
+                        "select": ["کاپیتان روی سینه‌اش دوخت... تو!"],
+                        "buy": ["تیم دوتایی شد!"],
+                        "poor": ["مأموریت‌ها جایزه می‌دن؛ جمع کن!"],
+                        "upgrade": ["تجهیزاتِ کاپیتان کامل شد!"],
+                        "go": ["مأموریت شروع شد — حرکت!"],
+                        "nitro": ["بوسترِ کاپیتان فعال!"],
+                        "hit": ["گزارش: آسیب جزئی؛ مأموریت ادامه دارد!"],
+                        "win": ["مأموریت انجام شد، کاپیتان برمی‌گرده!"],
+                        "lose": ["کاپیتان عقب نمی‌کشه؛ دوباره حمله!"],
+                        "taunt": ["تو مأموریت دادی، ما تحویل گرفتیم!", "گردن کج نکن؛ خط پایان همینه!"],
+                },
+        },
+        "nissan_blue": {
+                "nick": "نیسانِ اکبر",
+                "voice": {"pitch": 145.0, "tone": 0.9, "rate": 6.0, "jit": 0.08},
+                "lines": {
+                        "idle": ["هوم. آبیِ اکبرم. لونگِ بابام به گردنه، آسفالت به چرخم.", "بار سنگین؟ خنده داره.", "اکبر گفت: ببرش خط پایان، برگردونش سالم."],
+                        "select": ["سوار شو. اکبر خودش لاستیک‌هامو بسته."],
+                        "buy": ["هوم. اکبر خوشحال می‌شه."],
+                        "poor": ["اکبر می‌گه: سکه بیار."],
+                        "upgrade": ["هوم. محکم‌تر از دیوارِ جنوب."],
+                        "go": ["لونگو بستیم. رفتیم."],
+                        "nitro": ["هوووم! نیسانِ پر!"],
+                        "hit": ["گلگیرم... اکبر می‌فهمه. ولی می‌بخشه."],
+                        "win": ["هوم. مثل همیشه."],
+                        "lose": ["اکبر گفت: دوباره. حرف دیگه نزن."],
+                        "taunt": ["سایه‌ی نیسان رو هم تیکه می‌ندازن، تو چی!", "واسه چراغ قرمز هم دیر می‌رسی داداش!"],
+                },
+        },
+        "formula_red": {
+                "nick": "فرمول آتش",
+                "voice": {"pitch": 430.0, "tone": 0.85, "rate": 14.0, "jit": 0.22},
+                "lines": {
+                        "idle": ["بال جلو! بال عقب! جون نصف!", "سرخِ توربوی پیستم — چرخام زمین رو گاز می‌کنن!", "نیم‌گرمِ موتور که شد، دیگه هیچی جلودارم نیست!"],
+                        "select": ["ایول! بالاخره پیست واقعی!"],
+                        "buy": ["به تیم آتش خوش اومدی!"],
+                        "poor": ["توربو گرونه رفیق!"],
+                        "upgrade": ["حالا سوخت‌گیریِ بلندترم!"],
+                        "go": ["چراغا خاموش... آتش!"],
+                        "nitro": ["بوووستِ توربویی!"],
+                        "hit": ["ایرودینامیکم! آخ!"],
+                        "win": ["سکوی اول، مال همیشه!"],
+                        "lose": ["پیت‌استاپ می‌زنم و برمی‌گردم!"],
+                        "taunt": ["چرخامو فرسودی، هنوز رد شدم!", "مکانیک بذار کنار، اون‌طوری هم نمی‌رسه!"],
+                },
+        },
+        "formula_blue": {
+                "nick": "فرمول موج",
+                "voice": {"pitch": 470.0, "tone": 0.7, "rate": 15.0, "jit": 0.24},
+                "lines": {
+                        "idle": ["آبیِ تازه‌کار ولی بی‌باک!", "موج‌ها می‌گن سریع‌ترینم!", "هر روز بهتر از دیروز — شعارم همینه!"],
+                        "select": ["وای وای وای! بریم بریم بریم!"],
+                        "buy": ["بهترین روز زندگیمه!"],
+                        "poor": ["آخ! سکه‌هام هنوز کمه!"],
+                        "upgrade": ["حالا از خودمم سریع‌ترم!"],
+                        "go": ["سه، دو، یک... پرتاب!"],
+                        "nitro": ["یِهِهِهِه! پرندم!"],
+                        "hit": ["وای! بال نازکم!"],
+                        "win": ["گفتم که می‌برم! گفتم!"],
+                        "lose": ["دفعه بعد با نیتروی دوبرابر!"],
+                        "taunt": ["هنوز داری گرم می‌شی؟ ما رفتیم برگشتیم!", "عینکمی که زدی کمک نمی‌کنه!"],
+                },
+        },
+        "formula_black": {
+                "nick": "فرمول شاهین",
+                "voice": {"pitch": 205.0, "tone": 0.6, "rate": 8.5, "jit": 0.1},
+                "lines": {
+                        "idle": ["مشکی-طلایی. شب که بشه، رکورد می‌شکنم.", "صدای موتورم رو که بشنوی، صبح رو می‌بینی.", "بالای سرت بال طلاییم رد می‌شه."],
+                        "select": ["انتخابِ درست. همیشه."],
+                        "buy": ["تاج سرت بذار."],
+                        "poor": ["تاج قیمت داره."],
+                        "upgrade": ["حالا حتی سایه‌ام سریع‌تره."],
+                        "go": ["پرواز آغاز."],
+                        "nitro": ["شبِ سیاه، خطِ طلایی!"],
+                        "hit": ["بال طلاییم را گرفتند... بی‌رحم‌تر می‌شوم."],
+                        "win": ["رکورد جا افتاد."],
+                        "lose": ["شب هنوز جوان است."],
+                        "taunt": ["عقب موندن شغل توئه، جلو رفتن شغل من!", "ساعتِ شبی را ببین؛ هنوز دور اولی!"],
+                },
+        },
+        "akbar": {
+                "nick": "اکبر سیبیلو",
+                "voice": {"pitch": 165.0, "tone": 0.8, "rate": 8.0, "jit": 0.12},
+                "lines": {
+                        "idle": ["سلام سلام! اکبرم؛ سیبیلوم، لونگم، نیسانم آبی!", "مأموریت امروز سخته، ولی ما از اون سخت‌تریم!", "تو این محل هیچ‌کس با اکبر رقابت نمی‌کنه، جز چراغ قرمز!", "گازِ نیسان که می‌ره پایین، حرفم بالا می‌ره!"],
+                        "go": ["جا خالی کن! لونگو بستیم، رفتیم!"],
+                        "nitro": ["حالا نیسان رو ببین چجوری می‌پره!"],
+                        "hit": ["ای وای، لونگو خیس کردی!"],
+                        "win": ["آفرین رفیق! شب شیرینه امشب!"],
+                        "lose": ["ناز نکن! اکبر و نیسان پشتمونن!"],
+                        "taunt": ["بیا ببین پدرت اومد تو جاده!", "سیبیلمو بوس بزن که رد شدم!"],
+                },
+        },
+        "ustad": {
+                "nick": "استاد فنر",
+                "voice": {"pitch": 210.0, "tone": 0.5, "rate": 8.0, "jit": 0.12},
+                "lines": {
+                        "idle": ["بیا بیا! ماشینت رو به من بسپار!", "آچار شماره‌ی چهارده کو؟!", "کارِ استاد که تمیزه دیگه!", "سیبیلَم رو بوس بزن، کارتم تمومه!"],
+                        "upgrade": ["هیس... الان صدای موتور رو ببین!"],
+                        "buy": ["انتخابِ خوبی بود جوانمرد!"],
+                        "hit": ["دوباره تصادف؟ بیا ببینم..."],
+                },
+        },
+}
+
+const RISHKHANDHA := [
+        "بیا برس! نه، الان که نمی‌رسه!",
+        "آینه رو نگاه کن که کی رد شد!",
+        "چراغ قرمز هم دنبالت می‌گرده!",
+        "دنده رو وارونه زدی داداش!",
+        "موتورم گرمه، دلت که سرد شد!",
+        "پارک دبل مال من، خط پایانم همین‌طور!",
+        "لاستیکم بهتره، راننده‌م هم!",
+        "ساعت نهم شبی، تو هنوز تو دور برگشتی!",
+        "این سرعت؟ ما با پای پیاده خنده‌دارتریم!",
+        "من مسابقه دادم، تو داری قدم می‌زنی!",
+        "بوق بزن شاید صدات اومد!",
+        "هنوز داری گرم می‌شی؟ ما رفتیم برگشتیم!",
+        "سایه‌مو هم نمی‌رسی!",
+        "گاز کافیه، عامل کمه!",
+]
+
+const HALHA := {
+        "idle": "chill", "select": "happy", "buy": "happy", "poor": "grumpy",
+        "upgrade": "happy", "go": "happy", "nitro": "happy", "hit": "grumpy",
+        "win": "happy", "lose": "chill", "boost": "happy", "taunt": "happy",
+}
+
+static var _last_idle := {}
+static var _srg := RandomNumberGenerator.new()
+
+var hobab: Control = null
+var pakhsh_goftar: AudioStreamPlayer = null
+var goftar_faal := false # صدای لاله‌زبان خاموشه، حباب متنی کافیه
+var _tasadofi := RandomNumberGenerator.new()
+var _sh_mashin := 0
+
+func _ready() -> void:
+        _tasadofi.randomize()
+        pakhsh_goftar = AudioStreamPlayer.new()
+        pakhsh_goftar.volume_db = -2.0
+        add_child(pakhsh_goftar)
+
+static func pick_line(car_id: String, ctx: String) -> String:
+        if not SHAKSIATHA.has(car_id):
+                return ""
+        var hawz: Array = SHAKSIATHA[car_id]["lines"].get(ctx, [])
+        if hawz.is_empty() and ctx == "taunt":
+                hawz = RISHKHANDHA
+        if hawz.is_empty():
+                return ""
+        var kelid := car_id + ":" + ctx
+        var akharin: int = int(_last_idle.get(kelid, -1))
+        var i := _srg.randi_range(0, hawz.size() - 1)
+        if hawz.size() > 1 and i == akharin:
+                i = (i + 1) % hawz.size()
+        _last_idle[kelid] = i
+        return str(hawz[i])
+
+func gap_e_aval(anchor_getter: Callable, car_ids_getter: Callable, min_wait := 7.0, max_wait := 13.0) -> void:
+        var t := Timer.new()
+        t.wait_time = _tasadofi.randf_range(min_wait, max_wait)
+        t.one_shot = false
+        t.timeout.connect(func():
+                var shha: Array = car_ids_getter.call()
+                if shha.is_empty():
+                        return
+                var sh: String = shha[_tasadofi.randi_range(0, shha.size() - 1)]
+                var langar: Control = anchor_getter.call(sh)
+                if langar != null and langar.is_visible_in_tree():
+                        begu(langar, sh, "idle")
+                t.wait_time = _tasadofi.randf_range(min_wait, max_wait))
+        add_child(t)
+        t.start()
+
+func begu(langar: Control, car_id: String, ctx: String) -> void:
+        if not SHAKSIATHA.has(car_id):
+                return
+        var khat := pick_line(car_id, ctx)
+        if khat.is_empty():
+                return
+        for i in Koli.MASHINHA.size():
+                if str(Koli.MASHINHA[i]["id"]) == car_id:
+                        _sh_mashin = i
+                        break
+        _hobab_neshon(langar, khat)
+        _goftar(khat, car_id, str(HALHA.get(ctx, "chill")))
+        CarBrain.wobble(langar)
+
+func _hobab_neshon(langar: Control, text: String) -> void:
+        if hobab != null:
+                hobab.queue_free()
+                hobab = null
+        var b := Bubble.new()
+        b.brain = self
+        b.set_text(text)
+        var fnt_b: Resource = load("res://assets/fonts/Lalezar-Regular.ttf")
+        if fnt_b is FontFile:
+                b.add_theme_font_override("font", fnt_b)
+        var bala := langar.global_position
+        var w := maxf(190.0, minf(400.0, text.length() * 13.0 + 70.0))
+        b.size = Vector2(w, 0)
+        var px := bala.x + langar.size.x * 0.5 - w * 0.5
+        px = clampf(px, 12.0, 1280.0 - w - 12.0)
+        var py := bala.y - 86.0
+        if py < 8.0:
+                py = bala.y + langar.size.y + 10.0
+        b.position = Vector2(px, py)
+        b.z_index = 60
+        var gerehe_ped := langar.get_parent()
+        if gerehe_ped == null:
+                gerehe_ped = self
+        gerehe_ped.add_child(b)
+        hobab = b
+
+func _goftar(text: String, car_id: String, mood: String) -> void:
+        if not goftar_faal:
+                return # پیش‌فرض سکوت — ریتم طنز از متن می‌آید نه از بوق سینوسی
+        var v: Dictionary = SHAKSIATHA[car_id]["voice"] if SHAKSIATHA.has(car_id) else {"pitch": 300.0, "tone": 0.5, "rate": 10.0, "jit": 0.15}
+        var zir := float(v["pitch"])
+        var nava := float(v["tone"])
+        var nerkh := float(v["rate"])
+        var lash := float(v["jit"])
+        var toole_harf := 1.0 / nerkh
+        var tool := clampf(0.25 + text.length() * 0.045, 0.45, 2.4)
+        var harfha := int(ceil(tool / toole_harf))
+        var sr := 22050
+        var n := int(tool * sr)
+        var dade := PackedByteArray()
+        dade.resize(n * 2)
+        var faz := 0.0
+        for k in harfha:
+                var zire_harf := zir * (1.0 + _tasadofi.randf_range(-lash, lash))
+                if mood == "happy":
+                        zire_harf *= 1.0 + 0.06 * float(k) / float(harfha) # آهنگین رو به بالا
+                elif mood == "grumpy":
+                        zire_harf *= 1.0 - 0.05 * float(k) / float(harfha)
+                var qadam := 2.0 * PI * zire_harf / float(sr)
+                var s0 := int(float(k) * toole_harf * sr)
+                var s1: int = min(n, int(float(k + 1) * toole_harf * sr) - int(sr * 0.02))
+                for i in range(s0, s1):
+                        var tt := float(i - s0) / float(sr)
+                        var dar_harf := float(i - s0) / float(toole_harf * sr)
+                        var poush := pow(maxf(0.0, sin(PI * clampf(dar_harf, 0.0, 1.0))), 0.65)
+                        if tt < 0.01 or tt > toole_harf - 0.03:
+                                poush = 0.0
+                        var s := sin(faz)
+                        var sq := signf(s)
+                        var jirbejir := 1.0 + 0.02 * sin(2.0 * PI * 6.0 * tt)
+                        var damane := poush * 0.34 * jirbejir
+                        var meghdar := (1.0 - nava) * s + nava * sq
+                        var iv := int(clampf(meghdar * damane, -1.0, 1.0) * 32767.0)
+                        dade.encode_s16(i * 2, iv)
+                        faz += qadam
+        var wav := AudioStreamWAV.new()
+        wav.format = AudioStreamWAV.FORMAT_16_BITS
+        wav.mix_rate = sr
+        wav.stereo = false
+        wav.data = dade
+        pakhsh_goftar.stream = wav
+        pakhsh_goftar.pitch_scale = 1.0
+        pakhsh_goftar.play()
+
+static func add_breathing(ferman_dasti: Control, damane := 3.5, tool := 1.3) -> void:
+        var paye := ferman_dasti.position.y
+        var t := ferman_dasti.create_tween().set_loops()
+        t.tween_property(ferman_dasti, "position:y", paye - damane, tool).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+        t.tween_property(ferman_dasti, "position:y", paye + damane * 0.4, tool).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+static func wobble(ferman_dasti: Control) -> void:
+        if ferman_dasti == null or not is_instance_valid(ferman_dasti):
+                return
+        var t := ferman_dasti.create_tween()
+        t.tween_property(ferman_dasti, "rotation_degrees", 2.2, 0.09).set_trans(Tween.TRANS_SINE)
+        t.parallel().tween_property(ferman_dasti, "scale", ferman_dasti.scale * Vector2(1.03, 1.07), 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+        t.tween_property(ferman_dasti, "rotation_degrees", -1.6, 0.12).set_trans(Tween.TRANS_SINE)
+        t.tween_property(ferman_dasti, "rotation_degrees", 0.0, 0.1)
+        t.parallel().tween_property(ferman_dasti, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+
+class Bubble extends Control:
+        var nshan: Label
+        var maghz: CarBrain
+        var _t := 0.0
+        var _majmoo := 0.0
+        var _negah := 0.0
+
+        func matn_bezar(text: String) -> void:
+                var sb := StyleBoxFlat.new()
+                sb.bg_color = Color(0.99, 0.965, 0.88, 0.97)
+                sb.set_corner_radius_all(16)
+                sb.border_color = Color(0.29, 0.216, 0.157)
+                sb.border_width_left = 3
+                sb.border_width_right = 3
+                sb.border_width_top = 3
+                sb.border_width_bottom = 3
+                sb.shadow_color = Color(0, 0, 0, 0.3)
+                sb.shadow_size = 6
+                var panel := PanelContainer.new()
+                panel.add_theme_stylebox_override("panel", sb)
+                panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+                nshan = Label.new()
+                nshan.text = text
+                nshan.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+                nshan.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+                nshan.add_theme_font_size_override("font_size", 24)
+                nshan.add_theme_color_override("font_color", Color(0.22, 0.14, 0.07))
+                var m := MarginContainer.new()
+                m.add_theme_constant_override("margin_left", 16)
+                m.add_theme_constant_override("margin_right", 16)
+                m.add_theme_constant_override("margin_top", 10)
+                m.add_theme_constant_override("margin_bottom", 14)
+                m.add_child(nshan)
+                panel.add_child(m)
+                add_child(panel)
+                nshan.visible_characters = 0
+                _majmoo = float(text.length())
+                _negah = _majmoo * 0.055 + 1.3
+
+        func _ready() -> void:
+                mouse_filter = Control.MOUSE_FILTER_IGNORE
+                scale = Vector2(0.2, 0.2)
+                var t := create_tween()
+                t.tween_property(self, "scale", Vector2(1, 1), 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+        func _process(delta: float) -> void:
+                _t += delta
+                if nshan != null and _t < _majmoo * 0.055:
+                        nshan.visible_characters = int(_t / 0.055) + 1
+                if _t > _negah:
+                        modulate.a -= delta * 2.5
+                        position.y -= delta * 14.0
+                        if modulate.a <= 0.0:
+                                queue_free()

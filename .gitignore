@@ -1,17 +1,18 @@
 # godot
 game/.godot/
+game/android/build/
 
-# بیلد و خروجی‌ها
-build/
-download/
-upload/
-docs/
+# بیلد و خروجی‌ها — فقط ریشه، نه game/scripts
+/build/
+/download/
+/upload/
+/docs/
 
-# ابزارها و چیزهای لوکال
-tools/
-scripts/
-skills/
-keys/
+# ابزارها و چیزهای لوکال — اسلش اول یعنی فقط پوشه‌ی ابزار ریشه
+/tools/
+/scripts/
+/skills/
+/keys/
 
 # سیستمی
 *.tmp
