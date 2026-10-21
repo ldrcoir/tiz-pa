@@ -16,3 +16,7 @@ keys/
 # سیستمی
 *.tmp
 .DS_Store
+
+# لوکال
+.env
+worklog.md
