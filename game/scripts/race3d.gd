@@ -179,6 +179,10 @@ func _ready() -> void:
         arg_line = OS.get_cmdline_user_args()
         halate_aks = arg_line.has("--shots")
         otopilot = halate_aks or arg_line.has("--playtest")
+        # راهنمای تست مستقیم هر مرحله از خط فرمان: --start_level=N
+        for a in arg_line:
+                if a.begins_with("--start_level="):
+                        Koli.set_meta("start_level", int(a.split("=")[1]))
         var marhale := int(Koli.get_meta("start_level", 1))
         tarjome = _marhale_ba_id(marhale)
         ferman_dasti = tarjome["ctrl"]
@@ -214,7 +218,7 @@ func _donya_besaz() -> void:
         poush.background_mode = Environment.BG_SKY
         poush.sky = asman
         poush.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-        poush.ambient_light_energy = 0.75
+        poush.ambient_light_energy = 1.12 # سایه‌ی ساختمان‌ها را می‌کشد بالا — جاده سیاه‌قلم نمی‌شود
         poush.tonemap_mode = Environment.TONE_MAPPER_FILMIC
         poush.tonemap_white = 6.0
         # درخشش ظریف — آفتاب و رنگ‌فلزی جان می‌گیرند، نه نئون شبانه
@@ -222,7 +226,7 @@ func _donya_besaz() -> void:
         poush.glow_intensity = 0.55
         poush.glow_strength = 1.0
         poush.glow_bloom = 0.06
-        poush.glow_hdr_threshold = 1.05
+        poush.glow_hdr_threshold = 1.38 # فقط خورشید/شعله بدرخشند — تابلوها نه
         poush.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
         # رنگ‌ها جان بگیرند — بدون این، صحنه شسته و بد رنگ دیده می‌شود
         poush.adjustment_enabled = true
@@ -244,14 +248,19 @@ func _donya_besaz() -> void:
         khorsid.light_energy = tarjome["sun_e"] * 0.94
         khorsid.shadow_enabled = true
         khorsid.directional_shadow_max_distance = 150.0
-        khorsid.shadow_blur = 1.4
+        khorsid.shadow_blur = 2.2
+        khorsid.shadow_opacity = 0.72
         add_child(khorsid)
 
         var zamin := MeshInstance3D.new()
         var gm := PlaneMesh.new()
         gm.size = Vector2(4200, 4200)
         var gmat := StandardMaterial3D.new()
-        gmat.albedo_color = tarjome["ground"].darkened(0.25).darkened(0.25)
+        gmat.albedo_color = tarjome["ground"].darkened(0.25)
+        gmat.albedo_texture = _bafte_zamin() # لکه‌های خاک و چمن — زمین مرده‌ی یک‌دست نیست
+        gmat.uv1_triplanar = true
+        gmat.uv1_world_triplanar = true
+        gmat.uv1_scale = Vector3(0.045, 0.045, 0.045)
         gmat.roughness = 1.0
         gm.material = gmat
         zamin.mesh = gm
@@ -460,6 +469,17 @@ func _khatkoshi_jade() -> void:
                         var b2: Vector3 = NEMOONEHA[j2] + NORMLHA[j2] * kenar * (h - 0.35)
                         _mostati(st, a2, b2, 0.14, range_y, 0.02)
                         i += 2
+        # دو نوار لاستیک‌سوخته‌ی ظریف در هر جهت — آسفالت کارکرده، نه ریل قطار
+        var sayer := Color(0.30, 0.29, 0.275)
+        for lane in [0.30, 0.62]:
+                for kenar in [-1.0, 1.0]:
+                        i = 0
+                        while i < NEMOONE_N:
+                                var j4 := (i + 2) % NEMOONE_N
+                                var a4: Vector3 = NEMOONEHA[i] + NORMLHA[i] * kenar * h * lane
+                                var b4: Vector3 = NEMOONEHA[j4] + NORMLHA[j4] * kenar * h * lane
+                                _mostati(st, a4, b4, h * 0.05, sayer, 0.015)
+                                i += 2
         # خط شروع شطرنجی — کوچک و آبرفته، نه لکه‌های بزرگ
         var t_shorou := 12
         for k in t_shorou:
@@ -530,6 +550,182 @@ func _bafte_asfalt() -> ImageTexture:
                         aks.set_pixel(x, y, Color(g, g, g * 1.015))
         return ImageTexture.create_from_image(aks)
 
+func _bafte_zamin() -> ImageTexture:
+        # زمین اطراف شهر: لکه‌های نرم خاک/چمن — یکدستِ مرده نیست
+        var aks := Image.create(64, 64, false, Image.FORMAT_RGB8)
+        var t := RandomNumberGenerator.new()
+        t.seed = 63
+        var ghobleha := []
+        for b in 18:
+                ghobleha.append([t.randf(), t.randf(), t.randf_range(0.05, 0.16), t.randf_range(-0.10, 0.10)])
+        for y in 64:
+                for x in 64:
+                        var u := float(x) / 64.0
+                        var v := float(y) / 64.0
+                        var m := 0.0
+                        for gb in ghobleha:
+                                var dx := minf(absf(u - gb[0]), 1.0 - absf(u - gb[0]))
+                                var dy := minf(absf(v - gb[1]), 1.0 - absf(v - gb[1]))
+                                m += gb[3] * exp(-(dx * dx + dy * dy) / (gb[2] * gb[2]))
+                        var g := clampf(0.94 + m + t.randf_range(-0.05, 0.05), 0.0, 1.0)
+                        aks.set_pixel(x, y, Color(g, g, g))
+        return ImageTexture.create_from_image(aks)
+
+# برج شیشه‌ای مدرن — شبکه‌ی مولیون فلزی و شیشه‌های آبی با انعکاس آسمان
+func _bafte_shishe() -> Array: # [albedo, emission]
+        var aks := Image.create(256, 256, false, Image.FORMAT_RGB8)
+        var tash := Image.create(256, 256, false, Image.FORMAT_RGB8)
+        var t := RandomNumberGenerator.new()
+        t.seed = 21
+        aks.fill(Color(0.10, 0.15, 0.22))
+        tash.fill(Color(0, 0, 0))
+        var qadam := 32
+        for satr in 8:
+                var y0 := satr * qadam
+                for soton in 8:
+                        var x0 := soton * qadam
+                        # شیشه‌ی هر خانه: بازتاب آسمان یا تیره یا روشن (اتاق روشن)
+                        var no := t.randf()
+                        var shishe := Color(0.16, 0.26, 0.36)
+                        if no < 0.18:
+                                shishe = Color(0.34, 0.46, 0.56) # انعکاس ابر
+                        elif no < 0.30:
+                                shishe = Color(0.09, 0.13, 0.19)
+                        var ghash := t.randf() < 0.10
+                        for y in range(y0 + 1, y0 + qadam - 1):
+                                for x in range(x0 + 1, x0 + qadam - 1):
+                                        var jolge := 1.35 if (x - x0) < 7 else 1.0
+                                        aks.set_pixel(x, y, Color(shishe.r * jolge, shishe.g * jolge, shishe.b * jolge))
+                                        if ghash:
+                                                tash.set_pixel(x, y, Color(0.72, 0.60, 0.34))
+                        # مولیون‌های فلزی قاب
+                        for y in range(y0, y0 + qadam):
+                                aks.set_pixel(x0, y, Color(0.62, 0.65, 0.68))
+                        for x in range(x0, x0 + qadam):
+                                aks.set_pixel(x, y0, Color(0.55, 0.58, 0.61))
+        var b1 := ImageTexture.create_from_image(aks)
+        var b2 := ImageTexture.create_from_image(tash)
+        return [b1, b2]
+
+# نمای آجری کلاسیک — پنجره‌ی کوچک با قاب گچی و زیرپنجره
+func _bafte_ajoori() -> Array: # [albedo, emission]
+        var aks := Image.create(256, 256, false, Image.FORMAT_RGB8)
+        var tash := Image.create(256, 256, false, Image.FORMAT_RGB8)
+        var t := RandomNumberGenerator.new()
+        t.seed = 34
+        aks.fill(Color(0.62, 0.34, 0.24))
+        tash.fill(Color(0, 0, 0))
+        # بافت آجر — خطوط افقی ریز
+        for y in 256:
+                if y % 8 == 0:
+                        for x in 256:
+                                var c := aks.get_pixel(x, y)
+                                aks.set_pixel(x, y, c.darkened(0.18))
+        var boland := 42   # ~۶ طبقه در هر تکرار بافت
+        for satr in 6:
+                var y0 := satr * boland
+                for soton in 5:
+                        var x0 := soton * 51 + 12
+                        # قاب گچی روشن
+                        for y in range(y0 + 4, y0 + 34):
+                                for x in range(x0 - 3, x0 + 33):
+                                        if x < 0 or x >= 256 or y >= 256:
+                                                continue
+                                        aks.set_pixel(x, y, Color(0.86, 0.82, 0.74))
+                        # شیشه تیره
+                        var roshan := t.randf() < 0.14
+                        for y in range(y0 + 7, y0 + 31):
+                                for x in range(x0, x0 + 30):
+                                        var jolge := 1.3 if (y - y0) < 11 else 1.0
+                                        aks.set_pixel(x, y, Color(0.11 * jolge, 0.14 * jolge, 0.18 * jolge))
+                                        if roshan:
+                                                tash.set_pixel(x, y, Color(0.65, 0.52, 0.30))
+                        # زیرپنجره
+                        for x in range(x0 - 4, x0 + 34):
+                                if y0 + 34 < 256:
+                                        aks.set_pixel(x, y0 + 34, Color(0.78, 0.74, 0.66))
+        var b1 := ImageTexture.create_from_image(aks)
+        var b2 := ImageTexture.create_from_image(tash)
+        return [b1, b2]
+
+# نمای مغازه‌دار — طبقه‌ی همکف ویترین رنگی + پاروزه، بالای آن گچی
+func _bafte_maghazi() -> Array: # [albedo, emission]
+        var aks := Image.create(256, 256, false, Image.FORMAT_RGB8)
+        var tash := Image.create(256, 256, false, Image.FORMAT_RGB8)
+        var t := RandomNumberGenerator.new()
+        t.seed = 55
+        aks.fill(Color(0.88, 0.84, 0.78))
+        tash.fill(Color(0, 0, 0))
+        var paroize := [Color(0.72, 0.24, 0.20), Color(0.20, 0.42, 0.70), Color(0.80, 0.58, 0.16), Color(0.24, 0.52, 0.36), Color(0.55, 0.26, 0.60)]
+        # همکف = ردیف بالای بافت (v=0 پایِ دیوار در تریمپلانار جهانی)
+        for k in 4:
+                var x0 := k * 64
+                var rang: Color = paroize[t.randi() % paroize.size()]
+                # پاروزه‌ی مغازه
+                for y in range(0, 14):
+                        for x in range(x0, x0 + 64):
+                                aks.set_pixel(x, y, rang)
+                # ویترین شیشه‌ای
+                for y in range(14, 34):
+                        for x in range(x0 + 4, x0 + 60):
+                                aks.set_pixel(x, y, Color(0.14, 0.18, 0.22))
+                                tash.set_pixel(x, y, Color(0.55, 0.50, 0.36))
+                # ستون بین مغازه‌ها
+                for y in range(0, 34):
+                        for x in range(x0, x0 + 3):
+                                aks.set_pixel(x, y, Color(0.80, 0.76, 0.70))
+        # طبقات بالایی: پنجره‌های گچی ساده
+        var boland := 36
+        for satr in range(1, 7):
+                var y0 := satr * 36
+                for soton in 6:
+                        var x0 := soton * 42 + 6
+                        var roshan := t.randf() < 0.12
+                        for y in range(y0 + 5, y0 + 27):
+                                for x in range(x0, x0 + 28):
+                                        if y >= 256:
+                                                continue
+                                        aks.set_pixel(x, y, Color(0.14, 0.17, 0.21))
+                                        if roshan:
+                                                tash.set_pixel(x, y, Color(0.62, 0.50, 0.30))
+        var b1 := ImageTexture.create_from_image(aks)
+        var b2 := ImageTexture.create_from_image(tash)
+        return [b1, b2]
+
+# چهار جعبه‌ی نمای متفاوت — شهر تک‌رنگ نمی‌ماند
+func _namaha_besaz() -> Array:
+        var shishe_b: Array = _bafte_shishe()
+        var ajoori_b: Array = _bafte_ajoori()
+        var maghazi_b: Array = _bafte_maghazi()
+        var gh_b: Array = _bafte_namasakht()
+        var ferq := [
+                {"bafte": shishe_b, "rough": 0.20, "metal": 0.45, "uv": 0.052, "e": 0.35},
+                {"bafte": ajoori_b, "rough": 0.95, "metal": 0.0, "uv": 0.055, "e": 0.5},
+                {"bafte": gh_b, "rough": 0.82, "metal": 0.0, "uv": 0.033, "e": 0.45},
+                {"bafte": maghazi_b, "rough": 0.85, "metal": 0.0, "uv": 0.052, "e": 0.55},
+        ]
+        var khoruj := []
+        for f in ferq:
+                var m := StandardMaterial3D.new()
+                m.vertex_color_use_as_albedo = true
+                m.albedo_texture = f["bafte"][0]
+                m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+                m.roughness = f["rough"]
+                m.metallic = f["metal"]
+                m.metallic_specular = 0.45
+                m.emission_enabled = true
+                m.emission_texture = f["bafte"][1]
+                # شب‌نما فقط در غروب/طلایی — روز پنجره‌های روشن معنا ندارد
+                m.emission_energy_multiplier = f["e"] * (1.6 if tarjome["time"] != "day" else 0.5)
+                m.uv1_triplanar = true
+                m.uv1_world_triplanar = true
+                m.uv1_scale = Vector3(f["uv"], f["uv"], f["uv"])
+                var q := BoxMesh.new()
+                q.size = Vector3(1, 1, 1)
+                q.material = m
+                khoruj.append(q)
+        return khoruj
+
 func _bafte_namasakht() -> Array: # [albedo, emission]
         var aks := Image.create(512, 512, false, Image.FORMAT_RGB8)
         var tash := Image.create(512, 512, false, Image.FORMAT_RGB8)
@@ -571,29 +767,9 @@ func _manzare_besaz() -> void:
         tasadof.seed = int(tarjome["id"]) * 1337 + 5
         var h: float = tarjome["half"]
         var range_sakhtema: Array = tarjome["bld"]
-        # چندریسویی ساختمان — با نمای پنجره‌دار هم‌مقیاس دنیا
-        var qute := BoxMesh.new()
-        qute.size = Vector3(1, 1, 1)
-        var bmat := StandardMaterial3D.new()
-        bmat.vertex_color_use_as_albedo = true
-        bmat.roughness = 0.82
-        bmat.metallic_specular = 0.4
-        var bafte_n: Array = _bafte_namasakht()
-        bmat.albedo_texture = bafte_n[0]
-        bmat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-        bmat.emission_enabled = true
-        bmat.emission_texture = bafte_n[1]
-        # شب‌نما فقط در غروب/طلایی — روز پنجره‌های روشن معنا ندارد
-        bmat.emission_energy_multiplier = 1.4 if tarjome["time"] != "day" else 0.45
-        bmat.uv1_triplanar = true
-        bmat.uv1_world_triplanar = true
-        bmat.uv1_scale = Vector3(0.033, 0.033, 0.033) # یک طبقه ≈ ۳ متر — بافت ۱۰طبقه در ۳۰ متر
-        qute.material = bmat
-        var mm := MultiMesh.new()
-        mm.transform_format = MultiMesh.TRANSFORM_3D
-        mm.use_colors = true
-        mm.mesh = qute
-        var mashalha: Array = []
+        # چهار نوع نما: برج شیشه‌ای / آجری / گچی / مغازه‌دار — شهر یکدست و مرده نمی‌ماند
+        var quteha: Array = _namaha_besaz()
+        var ghesmatha := [[], [], [], []]
         var qadam := 3
         var i := 0
         while i < NEMOONE_N:
@@ -604,27 +780,52 @@ func _manzare_besaz() -> void:
                         var door := _kamtarin_fasele(paye)
                         if door < h + 6.0:
                                 continue
-                        mashalha.append({"p": paye, "c": range_sakhtema[tasadof.randi() % range_sakhtema.size()],
-                                "w": tasadof.randf_range(7, 15), "d": tasadof.randf_range(7, 13),
-                                "ht": tasadof.randf_range(7, 9) + (14.0 if tasadof.randf() < 0.3 else 0.0) + (22.0 if tasadof.randf() < 0.08 else 0.0)})
+                        var ht := tasadof.randf_range(7, 9) + (14.0 if tasadof.randf() < 0.3 else 0.0) + (22.0 if tasadof.randf() < 0.08 else 0.0)
+                        # نوع نما بر اساس بلندی + شانس — بلندها برج شیشه‌ای، همکف‌ها مغازه‌دار
+                        var no := 2
+                        if ht > 20.0:
+                                no = 0 if tasadof.randf() < 0.75 else 1
+                        elif ht < 12.0 and tasadof.randf() < 0.45:
+                                no = 3
+                        elif tasadof.randf() < 0.5:
+                                no = 1
+                        ghesmatha[no].append({"p": paye, "c": range_sakhtema[tasadof.randi() % range_sakhtema.size()],
+                                "w": tasadof.randf_range(7, 15), "d": tasadof.randf_range(7, 13), "ht": ht})
                 i += qadam
-        mm.instance_count = mashalha.size()
-        for k in mashalha.size():
-                var sp: Dictionary = mashalha[k]
-                var sc := Vector3(sp["w"], sp["ht"], sp["d"])
-                var qabe := Basis(Vector3.UP, tasadof.randf_range(-0.25, 0.25)).scaled(sc) # چرخش کم — گوشه‌ی ساختمان نباید داخل جاده بیفتد
-                mm.set_instance_transform(k, Transform3D(qabe, Vector3(sp["p"].x, sp["ht"] * 0.5, sp["p"].z)))
-                var rangi: Color = sp["c"]
-                mm.set_instance_color(k, rangi)
-                _khane_efe(sp["p"].x, sp["p"].z, maxf(sp["w"], sp["d"]) * 0.42)
-        var mmi := MultiMeshInstance3D.new()
-        mmi.multimesh = mm
-        mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-        add_child(mmi)
+        var hamgi := [[0.85, 0.92, 1.05], [1.0, 0.96, 0.92], [1.0, 1.0, 1.0], [1.04, 1.0, 0.94]]
+        for no in 4:
+                if ghesmatha[no].size() == 0:
+                        continue
+                var mm := MultiMesh.new()
+                mm.transform_format = MultiMesh.TRANSFORM_3D
+                mm.use_colors = true
+                mm.mesh = quteha[no]
+                mm.instance_count = ghesmatha[no].size()
+                for k in ghesmatha[no].size():
+                        var sp: Dictionary = ghesmatha[no][k]
+                        var sc := Vector3(sp["w"], sp["ht"], sp["d"])
+                        var qabe := Basis(Vector3.UP, tasadof.randf_range(-0.25, 0.25)).scaled(sc) # چرخش کم — گوشه‌ی ساختمان نباید داخل جاده بیفتد
+                        mm.set_instance_transform(k, Transform3D(qabe, Vector3(sp["p"].x, sp["ht"] * 0.5, sp["p"].z)))
+                        var rangi: Color = sp["c"]
+                        var hgb: Array = hamgi[no]
+                        rangi = Color(rangi.r * hgb[0], rangi.g * hgb[1], rangi.b * hgb[2])
+                        mm.set_instance_color(k, rangi)
+                        _khane_efe(sp["p"].x, sp["p"].z, maxf(sp["w"], sp["d"]) * 0.42)
+                var mmi := MultiMeshInstance3D.new()
+                mmi.multimesh = mm
+                mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+                add_child(mmi)
+        var mashalha: Array = []
+        for no in 4:
+                mashalha += ghesmatha[no]
         _posh_bam(mashalha, tasadof)
 
         # درخت‌ها + تیرهای چراغ (هر دو با برخورد دایره‌ای)
         _derakht_cheragh(tasadof)
+        # مخروط‌های راهنما داخل پیچ‌های تند
+        _ghootiha(tasadof)
+        # ابرهای نرم آسمان
+        _abrha()
         # چادر/سایبان بازار
         if tarjome["bazaar"] > 0.5:
                 _sayeba_bazar(tasadof)
@@ -633,6 +834,8 @@ func _manzare_besaz() -> void:
                 _bonaye_azadi()
         elif tarjome["landmark"] == "milad":
                 _borje_milad(tasadof)
+        # بیلبوردهای فارسی — با یک فریم تأخیر تا متن‌ها رندر شوند
+        _bilon_bepar.call_deferred()
 
 # پشت‌بام: جان‌پناه + کولر + منبع آب — خط افق شهر را زنده می‌کند
 func _posh_bam(mashalha: Array, tasadof: RandomNumberGenerator) -> void:
@@ -663,45 +866,42 @@ func _posh_bam(mashalha: Array, tasadof: RandomNumberGenerator) -> void:
         mm3.transform_format = MultiMesh.TRANSFORM_3D
         mm3.use_colors = true
         mm3.mesh = tank
-        var n1 := mashalha.size()
-        var n2 := 0
-        var n3 := 0
-        for sp in mashalha:
-                n2 += 1 + tasadof.randi() % 3
-                if tasadof.randf() < 0.3:
-                        n3 += 1
-        mm1.instance_count = n1
-        mm2.instance_count = n2
-        mm3.instance_count = n3
-        var k1 := 0
-        var k2 := 0
-        var k3 := 0
+        # اول همه‌ی ترنسفورم‌ها ساخته می‌شوند، بعد count دقیق از اندازه‌ی آرایه — هیچ بیرون‌زدگی‌ای ممکن نیست
+        var lst1: Array = []   # جان‌پناه
+        var lst2: Array = []   # کولر
+        var lst3: Array = []   # منبع آب
         for sp in mashalha:
                 var w: float = sp["w"]
                 var d: float = sp["d"]
                 var ht: float = sp["ht"]
                 var p: Vector3 = sp["p"]
                 # جان‌پناه — لبه‌ی بتنی دور بام
-                mm1.set_instance_transform(k1, Transform3D(Basis.IDENTITY.scaled(Vector3(w + 0.35, 0.5, d + 0.35)),
+                lst1.append(Transform3D(Basis.IDENTITY.scaled(Vector3(w + 0.35, 0.5, d + 0.35)),
                         Vector3(p.x, ht + 0.12, p.z)))
-                mm1.set_instance_color(k1, Color(0.58, 0.56, 0.53))
-                k1 += 1
                 # کولرهای پشت‌بام
                 var tedad := 1 + tasadof.randi() % 3
                 for c in tedad:
                         var ac := tasadof.randf_range(0.8, 1.5)
                         var ax := p.x + tasadof.randf_range(-w * 0.3, w * 0.3)
                         var az := p.z + tasadof.randf_range(-d * 0.3, d * 0.3)
-                        mm2.set_instance_transform(k2, Transform3D(Basis.IDENTITY.scaled(Vector3(ac, ac * 0.6, ac)),
+                        lst2.append(Transform3D(Basis.IDENTITY.scaled(Vector3(ac, ac * 0.6, ac)),
                                 Vector3(ax, ht + ac * 0.3 + 0.25, az)))
-                        mm2.set_instance_color(k2, Color(0.66, 0.65, 0.62))
-                        k2 += 1
                 # منبع آب — علامتِ پشت‌بامِ تهران
-                if k3 < n3 and tasadof.randf() < 0.3:
-                        mm3.set_instance_transform(k3, Transform3D(Basis.IDENTITY,
+                if tasadof.randf() < 0.3:
+                        lst3.append(Transform3D(Basis.IDENTITY,
                                 Vector3(p.x + tasadof.randf_range(-w * 0.2, w * 0.2), ht + 1.0, p.z + tasadof.randf_range(-d * 0.2, d * 0.2))))
-                        mm3.set_instance_color(k3, Color(0.72, 0.70, 0.66))
-                        k3 += 1
+        mm1.instance_count = lst1.size()
+        mm2.instance_count = lst2.size()
+        mm3.instance_count = lst3.size()
+        for k in lst1.size():
+                mm1.set_instance_transform(k, lst1[k])
+                mm1.set_instance_color(k, Color(0.58, 0.56, 0.53))
+        for k in lst2.size():
+                mm2.set_instance_transform(k, lst2[k])
+                mm2.set_instance_color(k, Color(0.66, 0.65, 0.62))
+        for k in lst3.size():
+                mm3.set_instance_transform(k, lst3[k])
+                mm3.set_instance_color(k, Color(0.72, 0.70, 0.66))
         var mi1 := MultiMeshInstance3D.new(); mi1.multimesh = mm1; add_child(mi1)
         var mi2 := MultiMeshInstance3D.new(); mi2.multimesh = mm2; add_child(mi2)
         var mi3 := MultiMeshInstance3D.new(); mi3.multimesh = mm3; add_child(mi3)
@@ -919,6 +1119,203 @@ func _borje_milad(tasadof: RandomNumberGenerator) -> void:
         am.material_override = cmat
         am.position = paye + Vector3(0, 226, 0)
         add_child(am)
+
+# ═════════════ مخروط‌های راهنما در پیچ‌های تند — بوی پیست دریفت ═════════════
+func _ghootiha(tasadof: RandomNumberGenerator) -> void:
+        var h: float = tarjome["half"]
+        var q := CylinderMesh.new()
+        q.top_radius = 0.02
+        q.bottom_radius = 0.15
+        q.height = 0.52
+        q.radial_segments = 8
+        var m := StandardMaterial3D.new()
+        m.albedo_color = Color(0.95, 0.45, 0.08)
+        m.roughness = 0.6
+        m.emission_enabled = true
+        m.emission = Color(0.9, 0.38, 0.05)
+        m.emission_energy_multiplier = 0.3
+        q.material = m
+        var jayha := []
+        var i := 0
+        while i < NEMOONE_N:
+                var badi := MAMASHA[(i + 14) % NEMOONE_N]
+                var lav := MAMASHA[i].angle_to(badi)
+                if lav > 0.10:
+                        # سمت بیرون پیچ: ضرب‌دکرودی مماس‌ها — پیچ چپ، بیرونش راست جاده است
+                        var bojn := MAMASHA[i].cross(badi).y
+                        var kenar := 1.0 if bojn > 0.0 else -1.0
+                        var c := 0
+                        var t2 := i
+                        while c < 4 and t2 < i + 16:
+                                var tp: Vector3 = NEMOONEHA[t2 % NEMOONE_N] + NORMLHA[t2 % NEMOONE_N] * kenar * (h + 0.55 + (c % 2) * 0.5)
+                                jayha.append(tp)
+                                c += 1
+                                t2 += 4
+                        i += 16
+                i += 6
+        if jayha.size() == 0:
+                return
+        var mm := MultiMesh.new()
+        mm.transform_format = MultiMesh.TRANSFORM_3D
+        mm.mesh = q
+        mm.instance_count = jayha.size()
+        for k in jayha.size():
+                var p: Vector3 = jayha[k]
+                mm.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(p.x, 0.26, p.z)))
+        var mmi := MultiMeshInstance3D.new()
+        mmi.multimesh = mm
+        add_child(mmi)
+
+# ═════════════ ابرهای نرم — آسمان خالی، آسمان بازی نیست ═════════════
+func _abrha() -> void:
+        var t := RandomNumberGenerator.new()
+        t.seed = 91
+        var aks := Image.create(128, 64, false, Image.FORMAT_RGBA8)
+        var ghobleha := []
+        for b in 20:
+                ghobleha.append([t.randf_range(0.22, 0.78), t.randf_range(0.38, 0.62), t.randf_range(0.09, 0.20), t.randf_range(0.55, 1.0)])
+        for y in 64:
+                for x in 128:
+                        var u := float(x) / 64.0
+                        var v := float(y) / 64.0
+                        var mohre := 0.0
+                        for gb in ghobleha:
+                                var dx: float = u - float(gb[0])
+                                var dy: float = (v - float(gb[1])) * 1.9
+                                mohre = maxf(mohre, gb[3] * exp(-(dx * dx + dy * dy) / (gb[2] * gb[2])))
+                        var hazhe := clampf(minf(u, 2.0 - u) * 1.3, 0.0, 1.0) * clampf(minf(v, 2.0 - v) * 1.6, 0.0, 1.0)
+                        aks.set_pixel(x, y, Color(1, 1, 1, clampf(mohre, 0.0, 1.0) * hazhe * 0.8))
+        aks.generate_mipmaps() # بدون این، نمونه‌برداری ناقص است — همان درس بیلبوردها
+        var tex := ImageTexture.create_from_image(aks)
+        var q := QuadMesh.new()
+        q.size = Vector2(1, 0.5)
+        var m2 := StandardMaterial3D.new()
+        m2.albedo_texture = tex
+        m2.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+        m2.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+        m2.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+        m2.cull_mode = BaseMaterial3D.CULL_DISABLED
+        # رنگ پایه — در غروب ابرها طلایی می‌گیرند
+        m2.albedo_color = Color(1, 1, 1, 1) if tarjome["time"] == "day" else Color(1.0, 0.86, 0.7, 1.0)
+        q.material = m2
+        # رو به مرکز شهر — بیلبوردِ ثابت در رندرر سازگاری لبه‌ای می‌شود، دستی می‌چرخانیم
+        for k in 16:
+                var a := TAU * k / 16.0 + t.randf_range(-0.2, 0.2)
+                var fasele := t.randf_range(240.0, 720.0)
+                var boland := t.randf_range(110.0, 200.0)
+                var afqi := t.randf_range(170.0, 320.0)
+                var abr := MeshInstance3D.new()
+                abr.mesh = q
+                abr.scale = Vector3(afqi, afqi * 0.5, 1.0)
+                abr.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+                add_child(abr)
+                abr.position = Vector3(cos(a) * fasele, boland, sin(a) * fasele)
+                abr.look_at(Vector3(0, boland, 0.01))
+
+# ═════════════ بیلبوردهای فارسی کنار جاده — جانِ خیابانِ ایرانی ═════════════
+func _matn_tex(matn: String, bg: Color, fg := Color(0.1, 0.08, 0.06)) -> ImageTexture:
+        # متن فارسیِ شکل‌گرفته با فونت واقعی → بافت؛ بدون این، تابلوها بی‌جان‌اند
+        var vp := SubViewport.new()
+        vp.size = Vector2i(512, 256)
+        vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+        add_child(vp)
+        var rect := ColorRect.new()
+        rect.color = bg
+        rect.size = Vector2(512, 256)
+        vp.add_child(rect)
+        # جداسازی دوسطری برای حروف درشت — تابلوی بزرگ، متن بزرگ
+        var khat1 := matn
+        var khat2 := ""
+        if matn.length() > 8:
+                var fasleha := []
+                for k in matn.length():
+                        if matn.substr(k, 1) == " ":
+                                fasleha.append(k)
+                if fasleha.size() > 0:
+                        var vasat: int = fasleha[fasleha.size() / 2]
+                        khat1 = matn.substr(0, vasat)
+                        khat2 = matn.substr(vasat + 1)
+        var tuli := maxf(khat1.length(), maxf(khat2.length(), 1))
+        var lbl := Label.new()
+        lbl.text = khat1 + ("\n" + khat2 if khat2 != "" else "")
+        lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+        lbl.size = Vector2(512, 256)
+        var f := load("res://assets/fonts/Lalezar-Regular.ttf")
+        if f != null:
+                lbl.add_theme_font_override("font", f)
+        lbl.add_theme_constant_override("line_spacing", -10)
+        # بودجه‌ی ارتفاع: لاله‌زار خطِ بلند دارد — دوسطری باید در ۲۵۶ پیکسل جا شود
+        var fs_v := int(236.0 / (1.35 * (2.0 if khat2 != "" else 1.0) - 0.12))
+        var fs_w := int(500.0 / tuli / 0.56)
+        lbl.add_theme_font_size_override("font_size", clampi(mini(fs_v, fs_w), 48, 148))
+        lbl.add_theme_color_override("font_color", fg)
+        vp.add_child(lbl)
+        await RenderingServer.frame_post_draw
+        var aks := vp.get_texture().get_image()
+        vp.queue_free()
+        aks.generate_mipmaps() # زنجیره‌ی مپی‌مپ کامل — در پیچ و دور، متن باز می‌ماند
+        return ImageTexture.create_from_image(aks)
+
+func _bilon_bepar() -> void:
+        var h: float = tarjome["half"]
+        var matnha := ["پیتزا ساندویچ", "کافه چنار", "تعویض روغن", "خشکبار تهرانی", "عطر و ادکلن", "آژانس مسافرتی", "دوچرخه ژیان", "میوه‌فروشی"]
+        var zamineha := [Color(0.95, 0.78, 0.10), Color(0.82, 0.22, 0.16), Color(0.16, 0.45, 0.80), Color(0.93, 0.90, 0.86), Color(0.55, 0.20, 0.62), Color(0.15, 0.55, 0.35), Color(0.93, 0.48, 0.10), Color(0.20, 0.62, 0.55)]
+        var bafteha: Array = []
+        for k in matnha.size():
+                bafteha.append(await _matn_tex(matnha[k], zamineha[k]))
+        var charchubi := StandardMaterial3D.new()
+        charchubi.albedo_color = Color(0.24, 0.25, 0.28)
+        charchubi.roughness = 0.7
+        var paye_m := CylinderMesh.new()
+        paye_m.top_radius = 0.09
+        paye_m.bottom_radius = 0.12
+        paye_m.height = 1.0
+        paye_m.radial_segments = 6
+        paye_m.material = charchubi
+        var panjare_m := BoxMesh.new()
+        panjare_m.size = Vector3(1, 1, 1)
+        panjare_m.material = charchubi
+        var shomare := 0
+        var i := 24
+        while i < NEMOONE_N - 24:
+                var kenar := 1.0 if (shomare % 2) == 0 else -1.0
+                var pp: Vector3 = NEMOONEHA[i] + NORMLHA[i] * kenar * (h + 3.4)
+                var g := Node3D.new()
+                g.position = Vector3(pp.x, 0.0, pp.z)
+                # چرخش: کمی رو به راننده‌ی نزدیک‌شونده — تابلو از دور خوانده می‌شود
+                var dakheli := (-NORMLHA[i] * kenar - MAMASHA[i] * 0.78).normalized()
+                g.rotation.y = atan2(dakheli.x, dakheli.z)
+                # دو پایه
+                for sx in [-2.6, 2.6]:
+                    var p_m := MeshInstance3D.new()
+                    p_m.mesh = paye_m
+                    p_m.scale = Vector3(1, 5.4, 1)
+                    p_m.position = Vector3(sx, 2.7, 0)
+                    g.add_child(p_m)
+                # قاب تیره + تخته‌ی تابلو با متن فارسی
+                var qab := MeshInstance3D.new()
+                qab.mesh = panjare_m
+                qab.scale = Vector3(7.4, 3.9, 0.16)
+                qab.position = Vector3(0, 7.35, 0.05)
+                g.add_child(qab)
+                var panel_m := StandardMaterial3D.new()
+                panel_m.albedo_texture = bafteha[shomare % bafteha.size()]
+                panel_m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+                panel_m.emission_enabled = true
+                panel_m.emission_texture = bafteha[shomare % bafteha.size()]
+                panel_m.emission_energy_multiplier = 0.25 # تابلو در غروب هم جان داشته باشد
+                panel_m.roughness = 0.5
+                var panel := QuadMesh.new()
+                panel.size = Vector2(7.1, 3.6)
+                panel.material = panel_m
+                var pmi := MeshInstance3D.new()
+                pmi.mesh = panel
+                pmi.position = Vector3(0, 7.4, 0.14)
+                g.add_child(pmi)
+                add_child(g)
+                shomare += 1
+                i += 62
 
 # ═══════════════════ ماشین‌ساز — بدنه‌ی اسپرت کم‌ضلع ═══════════════════
 func _mate_rang(c: Color, metallic := 0.32) -> StandardMaterial3D:
