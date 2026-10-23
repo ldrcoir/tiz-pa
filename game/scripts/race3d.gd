@@ -247,9 +247,9 @@ func _donya_besaz() -> void:
         khorsid.light_color = tarjome["sun_col"]
         khorsid.light_energy = tarjome["sun_e"] * 0.94
         khorsid.shadow_enabled = true
-        khorsid.directional_shadow_max_distance = 150.0
-        khorsid.shadow_blur = 2.2
-        khorsid.shadow_opacity = 0.72
+        khorsid.directional_shadow_max_distance = 130.0
+        khorsid.shadow_blur = 1.4 # سایه‌ی تیز — سایه‌ی شسته ‌شده حس NFS نمی‌دهد
+        khorsid.shadow_opacity = 0.82
         add_child(khorsid)
 
         var zamin := MeshInstance3D.new()
@@ -257,7 +257,11 @@ func _donya_besaz() -> void:
         gm.size = Vector2(4200, 4200)
         var gmat := StandardMaterial3D.new()
         gmat.albedo_color = tarjome["ground"].darkened(0.25)
-        gmat.albedo_texture = _bafte_zamin() # لکه‌های خاک و چمن — زمین مرده‌ی یک‌دست نیست
+        var zamin_b := _tex_bargozar("zamin")
+        if zamin_b != null:
+                gmat.albedo_texture = zamin_b
+        else:
+                gmat.albedo_texture = _bafte_zamin() # لکه‌های خاک و چمن — زمین مرده‌ی یک‌دست نیست
         gmat.uv1_triplanar = true
         gmat.uv1_world_triplanar = true
         gmat.uv1_scale = Vector3(0.045, 0.045, 0.045)
@@ -359,8 +363,8 @@ func _meshe_jade() -> void:
                 var r0: Vector3 = NEMOONEHA[i] + NORMLHA[i] * h0
                 var l1: Vector3 = NEMOONEHA[j] - NORMLHA[j] * h1
                 var r1: Vector3 = NEMOONEHA[j] + NORMLHA[j] * h1
-                var saye := 0.16 + 0.012 * (sin(float(i) * 0.13) + tasadof.randf() * 0.5)
-                var c := Color(saye, saye, saye + 0.008)
+                var saye := 0.88 + 0.028 * (sin(float(i) * 0.13) + tasadof.randf() * 0.5)
+                var c := Color(saye, saye, saye + 0.006)
                 var up := Vector3.UP
                 # بافت آسفالت باید در طول جاده تکرار شود — uv طولی
                 var v0: float = TOOL_JAM[i] * 0.12
@@ -374,12 +378,16 @@ func _meshe_jade() -> void:
         var meshe := st.commit()
         var mi := MeshInstance3D.new()
         var mate := StandardMaterial3D.new()
-        mate.albedo_color = Color(0.085, 0.082, 0.078)
+        mate.albedo_color = Color(0.46, 0.45, 0.44)
         mate.vertex_color_use_as_albedo = true
-        mate.albedo_texture = _bafte_asfalt() # بافت رویه‌ای — آسفالت یک‌دست مرده نیست
-        mate.roughness = 0.86
-        mate.metallic = 0.05
-        mate.metallic_specular = 0.55 # برق آفتاب روی آسفالت
+        var asfalt_b := _tex_bargozar("asfalt")
+        if asfalt_b != null:
+                mate.albedo_texture = asfalt_b # عکس واقعی آسفالت
+        else:
+                mate.albedo_texture = _bafte_asfalt() # بافت رویه‌ای — آسفالت یک‌دست مرده نیست
+        mate.roughness = 0.82
+        mate.metallic = 0.04
+        mate.metallic_specular = 0.6 # برق آفتاب روی آسفالت
         meshe.surface_set_material(0, mate)
         mi.mesh = meshe
         add_child(mi)
@@ -417,21 +425,23 @@ func _piyaderoha() -> void:
                         var b0: Vector3 = NEMOONEHA[j] + NORMLHA[j] * kenar * h
                         var a1: Vector3 = NEMOONEHA[i] + NORMLHA[i] * kenar * (h + sw)
                         var b1: Vector3 = NEMOONEHA[j] + NORMLHA[j] * kenar * (h + sw)
-                        var bala := Color(0.58, 0.57, 0.54)
+                        var bala := Color(0.62, 0.61, 0.585)
                         var up := Vector3.UP
-                        # سطح بالا (۰.۱۲ متر بالاتر)
                         var a0t := a0 + Vector3.UP * 0.12
                         var b0t := b0 + Vector3.UP * 0.12
                         var a1t := a1 + Vector3.UP * 0.12
                         var b1t := b1 + Vector3.UP * 0.12
-                        st.set_color(bala); st.set_normal(up); st.add_vertex(a0t)
-                        st.set_color(bala); st.set_normal(up); st.add_vertex(b0t)
-                        st.set_color(bala); st.set_normal(up); st.add_vertex(b1t)
-                        st.set_color(bala); st.set_normal(up); st.add_vertex(a0t)
-                        st.set_color(bala); st.set_normal(up); st.add_vertex(b1t)
-                        st.set_color(bala); st.set_normal(up); st.add_vertex(a1t)
+                        # uv طولی — سنگ‌فرش در طول پیاده‌رو تکرار می‌شود
+                        var v0: float = TOOL_JAM[i] * 0.35
+                        var v1: float = TOOL_JAM[j] * 0.35
+                        st.set_uv(Vector2(0, v0)); st.set_color(bala); st.set_normal(up); st.add_vertex(a0t)
+                        st.set_uv(Vector2(0, v1)); st.set_color(bala); st.set_normal(up); st.add_vertex(b0t)
+                        st.set_uv(Vector2(1, v1)); st.set_color(bala); st.set_normal(up); st.add_vertex(b1t)
+                        st.set_uv(Vector2(0, v0)); st.set_color(bala); st.set_normal(up); st.add_vertex(a0t)
+                        st.set_uv(Vector2(1, v1)); st.set_color(bala); st.set_normal(up); st.add_vertex(b1t)
+                        st.set_uv(Vector2(1, v0)); st.set_color(bala); st.set_normal(up); st.add_vertex(a1t)
                         # جدول سمت جاده (دیواره‌ی ۰.۱۲)
-                        var jadval := Color(0.72, 0.70, 0.66)
+                        var jadval := Color(0.74, 0.72, 0.685)
                         st.set_color(jadval); st.set_normal(-NORMLHA[i] * kenar); st.add_vertex(a0)
                         st.set_color(jadval); st.set_normal(-NORMLHA[j] * kenar); st.add_vertex(b0)
                         st.set_color(jadval); st.set_normal(-NORMLHA[j] * kenar); st.add_vertex(b0t)
@@ -440,7 +450,12 @@ func _piyaderoha() -> void:
                         st.set_color(jadval); st.set_normal(-NORMLHA[i] * kenar); st.add_vertex(a0t)
                         i += 1
         var meshe := st.commit()
-        meshe.surface_set_material(0, _mate_rangras(false))
+        var mate_p := _mate_rangras(false)
+        var piyade_b := _tex_bargozar("piyaderah")
+        if piyade_b != null:
+                mate_p.albedo_texture = piyade_b # سنگ‌فرش واقعی پیاده‌رو
+        mate_p.roughness = 0.9
+        meshe.surface_set_material(0, mate_p)
         var mi := MeshInstance3D.new()
         mi.mesh = meshe
         add_child(mi)
@@ -470,23 +485,24 @@ func _khatkoshi_jade() -> void:
                         _mostati(st, a2, b2, 0.14, range_y, 0.02)
                         i += 2
         # دو نوار لاستیک‌سوخته‌ی ظریف در هر جهت — آسفالت کارکرده، نه ریل قطار
-        var sayer := Color(0.30, 0.29, 0.275)
-        for lane in [0.30, 0.62]:
+        var sayer := Color(0.34, 0.335, 0.33)
+        for lane in [0.34, 0.66]:
                 for kenar in [-1.0, 1.0]:
                         i = 0
                         while i < NEMOONE_N:
                                 var j4 := (i + 2) % NEMOONE_N
                                 var a4: Vector3 = NEMOONEHA[i] + NORMLHA[i] * kenar * h * lane
                                 var b4: Vector3 = NEMOONEHA[j4] + NORMLHA[j4] * kenar * h * lane
-                                _mostati(st, a4, b4, h * 0.05, sayer, 0.015)
+                                _mostati(st, a4, b4, h * 0.035, sayer, 0.015)
                                 i += 2
-        # خط شروع شطرنجی — کوچک و آبرفته، نه لکه‌های بزرگ
+        # خط شروع شطرنجی — ۲۵ متر جلوتر از اسپان تا دوربینِ شمارش رویش سوار نشود
         var t_shorou := 12
+        var ix0 := 15
         for k in t_shorou:
                 var sc: Color = Color(0.72, 0.72, 0.70) if k % 2 == 0 else Color(0.16, 0.16, 0.16)
-                var a3: Vector3 = NEMOONEHA[0] - MAMASHA[0] * 0.8 + NORMLHA[0] * (h - 0.4 - k * (2 * h - 0.8) / float(t_shorou))
-                var b3: Vector3 = NEMOONEHA[0] + MAMASHA[0] * 0.8 + NORMLHA[0] * (h - 0.4 - (k + 1) * (2 * h - 0.8) / float(t_shorou))
-                _mostati(st, a3, b3, 1.6, sc, 0.025)
+                var a3: Vector3 = NEMOONEHA[ix0] - MAMASHA[ix0] * 0.6 + NORMLHA[ix0] * (h - 0.4 - k * (2 * h - 0.8) / float(t_shorou))
+                var b3: Vector3 = NEMOONEHA[ix0] + MAMASHA[ix0] * 0.6 + NORMLHA[ix0] * (h - 0.4 - (k + 1) * (2 * h - 0.8) / float(t_shorou))
+                _mostati(st, a3, b3, 1.2, sc, 0.025)
         var meshe := st.commit()
         meshe.surface_set_material(0, _mate_rangras(false))
         var mi := MeshInstance3D.new()
@@ -538,6 +554,13 @@ func _saktha_nazdik(p: Vector3) -> Array:
         return shabake_sakht.get(kelid, [])
 
 # ═════════════ بافت‌های رویه‌ای: آسفالت و نمای ساختمان — بدون فایل خارجی ═════════════
+# عکس‌های آماده در assets/textures — اگر نبود، همان رویه‌ی قدیمی
+func _tex_bargozar(nam: String) -> Texture2D:
+        var masir := "res://assets/textures/" + nam + ".jpg"
+        if ResourceLoader.exists(masir):
+                return load(masir)
+        return null
+
 func _bafte_asfalt() -> ImageTexture:
         var aks := Image.create(128, 128, false, Image.FORMAT_RGB8)
         var t := RandomNumberGenerator.new()
@@ -694,29 +717,26 @@ func _bafte_maghazi() -> Array: # [albedo, emission]
 
 # چهار جعبه‌ی نمای متفاوت — شهر تک‌رنگ نمی‌ماند
 func _namaha_besaz() -> Array:
-        var shishe_b: Array = _bafte_shishe()
-        var ajoori_b: Array = _bafte_ajoori()
-        var maghazi_b: Array = _bafte_maghazi()
-        var gh_b: Array = _bafte_namasakht()
+        # اول عکس‌های واقعی، نبودند بافت رویه‌ای
+        var shishe_b := _tex_bargozar("nam_shishe")
+        var ajoori_b := _tex_bargozar("nam_ajoori")
+        var gh_b := _tex_bargozar("nam_sangi")
+        var maghazi_b := _tex_bargozar("nam_maghazi")
         var ferq := [
-                {"bafte": shishe_b, "rough": 0.20, "metal": 0.45, "uv": 0.052, "e": 0.35},
-                {"bafte": ajoori_b, "rough": 0.95, "metal": 0.0, "uv": 0.055, "e": 0.5},
-                {"bafte": gh_b, "rough": 0.82, "metal": 0.0, "uv": 0.033, "e": 0.45},
-                {"bafte": maghazi_b, "rough": 0.85, "metal": 0.0, "uv": 0.052, "e": 0.55},
+                {"bafte": shishe_b if shishe_b != null else _bafte_shishe()[0], "rough": 0.18, "metal": 0.55, "uv": 0.085},
+                {"bafte": ajoori_b if ajoori_b != null else _bafte_ajoori()[0], "rough": 0.95, "metal": 0.0, "uv": 0.095},
+                {"bafte": gh_b if gh_b != null else _bafte_namasakht()[0], "rough": 0.85, "metal": 0.0, "uv": 0.085},
+                {"bafte": maghazi_b if maghazi_b != null else _bafte_maghazi()[0], "rough": 0.9, "metal": 0.0, "uv": 0.095},
         ]
         var khoruj := []
         for f in ferq:
                 var m := StandardMaterial3D.new()
                 m.vertex_color_use_as_albedo = true
-                m.albedo_texture = f["bafte"][0]
+                m.albedo_texture = f["bafte"]
                 m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
                 m.roughness = f["rough"]
                 m.metallic = f["metal"]
-                m.metallic_specular = 0.45
-                m.emission_enabled = true
-                m.emission_texture = f["bafte"][1]
-                # شب‌نما فقط در غروب/طلایی — روز پنجره‌های روشن معنا ندارد
-                m.emission_energy_multiplier = f["e"] * (1.6 if tarjome["time"] != "day" else 0.5)
+                m.metallic_specular = 0.5
                 m.uv1_triplanar = true
                 m.uv1_world_triplanar = true
                 m.uv1_scale = Vector3(f["uv"], f["uv"], f["uv"])
@@ -792,7 +812,7 @@ func _manzare_besaz() -> void:
                         ghesmatha[no].append({"p": paye, "c": range_sakhtema[tasadof.randi() % range_sakhtema.size()],
                                 "w": tasadof.randf_range(7, 15), "d": tasadof.randf_range(7, 13), "ht": ht})
                 i += qadam
-        var hamgi := [[0.85, 0.92, 1.05], [1.0, 0.96, 0.92], [1.0, 1.0, 1.0], [1.04, 1.0, 0.94]]
+        var hamgi := [[0.95, 0.97, 1.0], [1.0, 0.96, 0.92], [1.0, 1.0, 1.0], [1.04, 1.0, 0.94]]
         for no in 4:
                 if ghesmatha[no].size() == 0:
                         continue
@@ -822,6 +842,8 @@ func _manzare_besaz() -> void:
 
         # درخت‌ها + تیرهای چراغ (هر دو با برخورد دایره‌ای)
         _derakht_cheragh(tasadof)
+        # ماشین‌های پارک‌شده کنار جدول — خیابان خالی، خیابان نیست
+        _mashinha_park(tasadof)
         # مخروط‌های راهنما داخل پیچ‌های تند
         _ghootiha(tasadof)
         # ابرهای نرم آسمان
@@ -928,12 +950,19 @@ func _derakht_cheragh(tasadof: RandomNumberGenerator) -> void:
         var barg := SphereMesh.new()
         barg.radius = 1.0
         barg.height = 2.0
-        barg.radial_segments = 8
-        barg.rings = 5
+        barg.radial_segments = 11
+        barg.rings = 6
         var lmat := StandardMaterial3D.new()
         lmat.vertex_color_use_as_albedo = true
         lmat.roughness = 1.0
         barg.material = lmat
+        # لایه‌ی دوم تاج — گوی تنها شبیه توپ فوتبال است
+        var barg2 := SphereMesh.new()
+        barg2.radius = 1.0
+        barg2.height = 2.0
+        barg2.radial_segments = 10
+        barg2.rings = 5
+        barg2.material = lmat
         var mmT := MultiMesh.new()
         mmT.transform_format = MultiMesh.TRANSFORM_3D
         mmT.mesh = sandugh
@@ -941,6 +970,10 @@ func _derakht_cheragh(tasadof: RandomNumberGenerator) -> void:
         mmL.transform_format = MultiMesh.TRANSFORM_3D
         mmL.use_colors = true
         mmL.mesh = barg
+        var mmL2 := MultiMesh.new()
+        mmL2.transform_format = MultiMesh.TRANSFORM_3D
+        mmL2.use_colors = true
+        mmL2.mesh = barg2
         var tir := CylinderMesh.new()
         tir.top_radius = 0.07
         tir.bottom_radius = 0.09
@@ -990,17 +1023,24 @@ func _derakht_cheragh(tasadof: RandomNumberGenerator) -> void:
                 i += qadam
         mmT.instance_count = spotsT.size()
         mmL.instance_count = spotsT.size()
+        mmL2.instance_count = spotsT.size()
         for k in spotsT.size():
                 var tp: Vector3 = spotsT[k]
                 var th := tasadof.randf_range(2.2, 3.6)
                 mmT.set_instance_transform(k, Transform3D(Basis.IDENTITY.scaled(Vector3(1, th, 1)), Vector3(tp.x, th * 0.5, tp.z)))
                 var lh := tasadof.randf_range(1.6, 2.6)
-                var lb := Basis.IDENTITY.scaled(Vector3(lh, lh * 1.1, lh))
-                mmL.set_instance_transform(k, Transform3D(lb, Vector3(tp.x, th + lh * 0.45, tp.z)))
-                var lc := Color(0.30, 0.52, 0.24).lerp(Color(0.45, 0.65, 0.30), tasadof.randf())
+                var lb := Basis.IDENTITY.scaled(Vector3(lh, lh * 1.05, lh))
+                mmL.set_instance_transform(k, Transform3D(lb, Vector3(tp.x, th + lh * 0.42, tp.z)))
+                # لایه‌ی دوم تاج — جابجا و کوچک‌تر، درخت «پر» دیده می‌شود
+                var lh2 := lh * tasadof.randf_range(0.55, 0.7)
+                var af := tasadof.randf_range(0.35, 0.75)
+                var lb2 := Basis.IDENTITY.scaled(Vector3(lh2, lh2 * 0.95, lh2))
+                mmL2.set_instance_transform(k, Transform3D(lb2, Vector3(tp.x + af, th + lh * 0.42 + lh2 * 0.5, tp.z + af * 0.5)))
+                var lc := Color(0.26, 0.45, 0.20).lerp(Color(0.40, 0.58, 0.26), tasadof.randf())
                 if tarjome["time"] == "golden":
-                        lc = lc.lerp(Color(0.75, 0.62, 0.25), 0.25)
+                        lc = lc.lerp(Color(0.68, 0.56, 0.22), 0.3)
                 mmL.set_instance_color(k, lc)
+                mmL2.set_instance_color(k, lc.darkened(0.12))
         mmP.instance_count = spotsP.size()
         mmH.instance_count = spotsP.size()
         for k in spotsP.size():
@@ -1014,6 +1054,7 @@ func _derakht_cheragh(tasadof: RandomNumberGenerator) -> void:
                 mmH.set_instance_transform(k, Transform3D(b.scaled(Vector3(1, 1, 1)), hp))
         var miT := MultiMeshInstance3D.new(); miT.multimesh = mmT; add_child(miT)
         var miL := MultiMeshInstance3D.new(); miL.multimesh = mmL; add_child(miL)
+        var miL2 := MultiMeshInstance3D.new(); miL2.multimesh = mmL2; add_child(miL2)
         var miP := MultiMeshInstance3D.new(); miP.multimesh = mmP; add_child(miP)
         var miH := MultiMeshInstance3D.new(); miH.multimesh = mmH; add_child(miH)
 
@@ -1267,6 +1308,9 @@ func _bilon_bepar() -> void:
         var charchubi := StandardMaterial3D.new()
         charchubi.albedo_color = Color(0.24, 0.25, 0.28)
         charchubi.roughness = 0.7
+        # دو پوستر هنری هم بین تابلوهای فارسی — مثل بیلبوردهای ولیعصر
+        var poster1 := _tex_bargozar("poster_tas")
+        var poster2 := _tex_bargozar("poster_shahr")
         var paye_m := CylinderMesh.new()
         paye_m.top_radius = 0.09
         paye_m.bottom_radius = 0.12
@@ -1293,17 +1337,21 @@ func _bilon_bepar() -> void:
                     p_m.scale = Vector3(1, 5.4, 1)
                     p_m.position = Vector3(sx, 2.7, 0)
                     g.add_child(p_m)
-                # قاب تیره + تخته‌ی تابلو با متن فارسی
+                # قاب تیره + تخته‌ی تابلو — فارسی یا پوستر، یکی در میان
                 var qab := MeshInstance3D.new()
                 qab.mesh = panjare_m
                 qab.scale = Vector3(7.4, 3.9, 0.16)
                 qab.position = Vector3(0, 7.35, 0.05)
                 g.add_child(qab)
                 var panel_m := StandardMaterial3D.new()
-                panel_m.albedo_texture = bafteha[shomare % bafteha.size()]
+                var aks_shomare := shomare % 3
+                if aks_shomare == 2 and poster1 != null:
+                        panel_m.albedo_texture = poster1 if (shomare / 3) % 2 == 0 else (poster2 if poster2 != null else poster1)
+                else:
+                        panel_m.albedo_texture = bafteha[shomare % bafteha.size()]
                 panel_m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
                 panel_m.emission_enabled = true
-                panel_m.emission_texture = bafteha[shomare % bafteha.size()]
+                panel_m.emission_texture = panel_m.albedo_texture
                 panel_m.emission_energy_multiplier = 0.25 # تابلو در غروب هم جان داشته باشد
                 panel_m.roughness = 0.5
                 var panel := QuadMesh.new()
@@ -1318,15 +1366,19 @@ func _bilon_bepar() -> void:
                 i += 62
 
 # ═══════════════════ ماشین‌ساز — بدنه‌ی اسپرت کم‌ضلع ═══════════════════
-func _mate_rang(c: Color, metallic := 0.32) -> StandardMaterial3D:
+func _mate_rang(c: Color, metallic := 0.5) -> StandardMaterial3D:
         var m := StandardMaterial3D.new()
         m.albedo_color = c
-        m.roughness = 0.28 # لاکی براق — ولی نه آن‌قدر فلزی که قرمز نقره‌ای شود
+        m.roughness = 0.22
         m.metallic = clampf(metallic, 0.0, 1.0)
-        m.metallic_specular = 0.6
+        m.metallic_specular = 0.7
+        # لایه‌ی کلیرکوت — همان برق شیشه‌ای روی لاک که ماشین‌های NFS دارند
+        m.clearcoat_enabled = true
+        m.clearcoat = 0.9
+        m.clearcoat_roughness = 0.12
         m.rim_enabled = true
-        m.rim = 0.4
-        m.rim_tint = 0.4
+        m.rim = 0.55
+        m.rim_tint = 0.3
         return m
 
 func _mate_tir(c: Color, rough := 0.7) -> StandardMaterial3D:
@@ -1405,26 +1457,26 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         var rishe := Node3D.new()
         var pm := _mate_rang(rang)
         var shishe := StandardMaterial3D.new()
-        # شیشه‌ی دودی کدر — از پشت نباید داخل وان دیده شود
-        shishe.albedo_color = Color(0.035, 0.055, 0.085)
-        shishe.roughness = 0.06
-        shishe.metallic = 0.8
+        # شیشه‌ی دودی — کمی روشن‌تر که آسمون روش بشینه، نه سیاه‌قلم
+        shishe.albedo_color = Color(0.075, 0.10, 0.14)
+        shishe.roughness = 0.05
+        shishe.metallic = 0.85
         var tir := _mate_tir(Color(0.10, 0.10, 0.11), 0.85)     # پلاستیک مشکی
         var laki := _mate_rang(rang)                            # تکه‌های رنگ‌بدنه
         var khoruj := {"root": rishe, "wheels": [], "front": [], "paint": pm}
 
-        # ── بدنه‌ی اصلی: ۱۰ ایستگاه از دم تا پوزه — هاتچ‌بک اسپرت دریافتی ──
+        # ── بدنه‌ی اصلی: کوپه‌ی کلاسیک — کاپوت بلند، کابین عقب‌کشیده، دم باریک ──
         var istgahha := [
-                [-2.08, 0.26, 0.80, 0.74, 0.88],   # دم کوتاه‌شده (kammback)
-                [-1.78, 0.21, 0.89, 0.82, 0.95],
-                [-1.30, 0.19, 0.91, 0.86, 0.97],
-                [-0.60, 0.18, 0.92, 0.88, 0.98],
-                [ 0.10, 0.18, 0.92, 0.885, 0.98],
-                [ 0.70, 0.18, 0.91, 0.87, 0.965],
-                [ 1.20, 0.18, 0.87, 0.85, 0.925],  # سپر کاپوت
-                [ 1.62, 0.19, 0.80, 0.815, 0.855],
-                [ 1.95, 0.21, 0.745, 0.765, 0.79],
-                [ 2.12, 0.24, 0.70, 0.71, 0.745],  # پوزه
+                [-2.18, 0.32, 0.70, 0.58, 0.78],   # دم باریک (kammback)
+                [-1.95, 0.26, 0.76, 0.70, 0.86],   # شانه‌ی عقب
+                [-1.45, 0.25, 0.78, 0.80, 0.88],
+                [-0.95, 0.24, 0.78, 0.81, 0.86],   # دک صندوق
+                [-0.35, 0.24, 0.76, 0.80, 0.84],
+                [ 0.30, 0.24, 0.74, 0.80, 0.80],
+                [ 0.90, 0.24, 0.72, 0.81, 0.76],   # شانه‌ی کاپوت
+                [ 1.50, 0.25, 0.70, 0.78, 0.72],
+                [ 1.95, 0.27, 0.68, 0.72, 0.68],
+                [ 2.20, 0.31, 0.66, 0.62, 0.64],   # نوک پوزه
         ]
         var halqeha := []
         for s in istgahha:
@@ -1438,13 +1490,13 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         badane.material_override = pm
         rishe.add_child(badane)
 
-        # ── اتاقک شیشه‌ای: از هچ عقب تا پای شیشه‌ی جلو ──
+        # ── اتاقک شیشه‌ای: گنبد عقب‌کشیده روی دک — سیلوئت کوپه ──
         var kabin_ist := [
-                [-1.02, 0.955, 0.72, 0.99],
-                [-0.50, 0.950, 0.68, 1.265],
-                [ 0.15, 0.950, 0.645, 1.305],
-                [ 0.75, 0.920, 0.60, 1.225],
-                [ 1.16, 0.895, 0.575, 0.90],
+                [-1.20, 0.85, 0.58, 0.90],
+                [-0.65, 0.83, 0.54, 1.16],
+                [-0.05, 0.82, 0.51, 1.24],
+                [ 0.50, 0.81, 0.50, 1.10],
+                [ 1.02, 0.79, 0.49, 0.80],
         ]
         var halqeha_k := []
         for s2 in kabin_ist:
@@ -1458,7 +1510,7 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         kabin.material_override = shishe
         rishe.add_child(kabin)
         # سقف رنگ‌بدنه روی گنبد شیشه — مثل ماشین واقعی
-        _qute(rishe, Vector3(1.10, 0.05, 1.05), Vector3(0, 1.315, -0.05), laki)
+        _qute(rishe, Vector3(0.94, 0.05, 0.90), Vector3(0, 1.25, -0.05), laki)
 
         # ── جزئیات جلو: اسپلیتر + جلوپنجره + چراغ ──
         _qute(rishe, Vector3(1.46, 0.06, 0.30), Vector3(0, 0.225, 2.16), tir)
@@ -1473,11 +1525,11 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         tlm.emission_enabled = true
         tlm.emission = Color(0.95, 0.06, 0.04)
         tlm.emission_energy_multiplier = 1.4
-        for sx in [-0.47, 0.47]:
-                _qute(rishe, Vector3(0.34, 0.09, 0.05), Vector3(sx, 0.645, 2.135), hlm)
+        for sx in [-0.44, 0.44]:
+                _qute(rishe, Vector3(0.36, 0.10, 0.05), Vector3(sx, 0.56, 2.135), hlm)
         # ── عقب: سپر + نوار چراغ عقب تمام‌عرض + پلاک + اگزوز ──
-        _qute(rishe, Vector3(1.42, 0.20, 0.20), Vector3(0, 0.30, -2.10), tir)
-        _qute(rishe, Vector3(1.20, 0.09, 0.045), Vector3(0, 0.74, -2.105), tlm)
+        _qute(rishe, Vector3(1.08, 0.20, 0.20), Vector3(0, 0.30, -2.10), tir)
+        _qute(rishe, Vector3(1.24, 0.09, 0.045), Vector3(0, 0.72, -2.105), tlm)
         _qute(rishe, Vector3(0.38, 0.12, 0.03), Vector3(0, 0.46, -2.19), _mate_tir(Color(0.85, 0.85, 0.80), 0.5))
         var egzoz := CylinderMesh.new()
         egzoz.top_radius = 0.045
@@ -1491,22 +1543,25 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         egi.position = Vector3(0.40, 0.26, -2.13)
         rishe.add_child(egi)
         # ── اسپویلر اردک‌دمی چسبیده به عقب — نه قفسه‌ی معلق ──
-        _qute(rishe, Vector3(1.35, 0.045, 0.28), Vector3(0, 0.905, -1.95), laki)
-        _qute(rishe, Vector3(0.05, 0.09, 0.22), Vector3(0.62, 0.875, -1.97), tir)
-        _qute(rishe, Vector3(0.05, 0.09, 0.22), Vector3(-0.62, 0.875, -1.97), tir)
+        _qute(rishe, Vector3(1.34, 0.05, 0.30), Vector3(0, 0.905, -1.99), laki)
+        _qute(rishe, Vector3(0.05, 0.09, 0.22), Vector3(0.58, 0.875, -2.01), tir)
+        _qute(rishe, Vector3(0.05, 0.09, 0.22), Vector3(-0.58, 0.875, -2.01), tir)
         # ── دامن جانبی + آینه‌ها ──
         _qute(rishe, Vector3(0.05, 0.09, 1.90), Vector3(0.875, 0.235, 0), tir)
         _qute(rishe, Vector3(0.05, 0.09, 1.90), Vector3(-0.875, 0.235, 0), tir)
-        _qute(rishe, Vector3(0.15, 0.06, 0.09), Vector3(0.90, 0.99, 0.78), laki)
-        _qute(rishe, Vector3(0.15, 0.06, 0.09), Vector3(-0.90, 0.99, 0.78), laki)
-        # ── هود اسکوپ ──
-        _qute(rishe, Vector3(0.55, 0.06, 0.45), Vector3(0, 0.905, 1.45), tir, Vector3(-9, 0, 0))
+        _qute(rishe, Vector3(0.16, 0.06, 0.10), Vector3(0.90, 0.86, 0.72), laki)
+        _qute(rishe, Vector3(0.16, 0.06, 0.10), Vector3(-0.90, 0.86, 0.72), laki)
+        # ── هود اسکوپ — چسبیده به کاپوتِ پایین‌آمده ──
+        _qute(rishe, Vector3(0.55, 0.05, 0.42), Vector3(0, 0.735, 1.42), tir, Vector3(-6, 0, 0))
+        # دهانه‌های هوا در پوزه — نفس‌کشیدن اسپرت
+        _qute(rishe, Vector3(0.34, 0.11, 0.04), Vector3(0.34, 0.42, 2.155), tir)
+        _qute(rishe, Vector3(0.34, 0.11, 0.04), Vector3(-0.34, 0.42, 2.155), tir)
         # ── راه‌راه دریفت روی سقف و دک — سبک ماشین‌های دریفت ایرانی ──
         var ragh := _mate_tir(Color(0.10, 0.10, 0.11), 0.4)
-        _qute(rishe, Vector3(0.09, 0.012, 1.00), Vector3(0.17, 1.345, -0.05), ragh)
-        _qute(rishe, Vector3(0.09, 0.012, 1.00), Vector3(-0.17, 1.345, -0.05), ragh)
-        _qute(rishe, Vector3(0.09, 0.012, 0.70), Vector3(0.17, 0.925, -1.72), ragh, Vector3(-7, 0, 0))
-        _qute(rishe, Vector3(0.09, 0.012, 0.70), Vector3(-0.17, 0.925, -1.72), ragh, Vector3(-7, 0, 0))
+        _qute(rishe, Vector3(0.09, 0.012, 0.92), Vector3(0.16, 1.282, -0.08), ragh)
+        _qute(rishe, Vector3(0.09, 0.012, 0.92), Vector3(-0.16, 1.282, -0.08), ragh)
+        _qute(rishe, Vector3(0.09, 0.012, 0.62), Vector3(0.15, 0.895, -1.74), ragh, Vector3(-7, 0, 0))
+        _qute(rishe, Vector3(0.09, 0.012, 0.62), Vector3(-0.15, 0.895, -1.74), ragh, Vector3(-7, 0, 0))
 
         # ── راننده — هلیا با مقنعه، از شیشه‌ی دودی پیداست ──
         if with_driver:
@@ -1531,31 +1586,53 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
                 ranande.add_child(gm2)
                 _qute(ranande, Vector3(0.40, 0.20, 0.18), Vector3(0, -0.10, 0), _mate_tir(Color(0.25, 0.32, 0.38)))
 
-        # ── چرخ‌ها: لاستیک توری + رینگ اسپرت ──
+        # ── چرخ‌ها: لاستیک توری + رینگ پنج‌پره + دیسک و کالیپر ترمز ──
         var wr := 0.34
         var lastik_tori := TorusMesh.new()
-        lastik_tori.inner_radius = 0.145
+        lastik_tori.inner_radius = 0.150
         lastik_tori.outer_radius = 0.345
-        lastik_tori.rings = 20
-        lastik_tori.ring_segments = 10
-        var wmat2 := _mate_tir(Color(0.07, 0.07, 0.075), 0.92)
+        lastik_tori.rings = 22
+        lastik_tori.ring_segments = 12
+        var wmat2 := _mate_tir(Color(0.065, 0.065, 0.07), 0.92)
         lastik_tori.material = wmat2
         var ring := CylinderMesh.new()
-        ring.top_radius = 0.165
-        ring.bottom_radius = 0.165
-        ring.height = 0.14
-        ring.radial_segments = 14
-        ring.material = _mate_tir(Color(0.58, 0.60, 0.64), 0.28)
+        ring.top_radius = 0.175
+        ring.bottom_radius = 0.175
+        ring.height = 0.15
+        ring.radial_segments = 16
+        ring.material = _mate_tir(Color(0.62, 0.64, 0.68), 0.22)
         var hub := CylinderMesh.new()
         hub.top_radius = 0.055
         hub.bottom_radius = 0.055
-        hub.height = 0.16
+        hub.height = 0.17
         hub.radial_segments = 10
         hub.material = _mate_tir(Color(0.18, 0.18, 0.20), 0.5)
-        for wp in [Vector3(0.79, wr, 1.38), Vector3(-0.79, wr, 1.38), Vector3(0.79, wr, -1.38), Vector3(-0.79, wr, -1.38)]:
+        # دیسک ترمز و کالیپر — از لای لایه‌های رینگ پیداست
+        var disk := CylinderMesh.new()
+        disk.top_radius = 0.20
+        disk.bottom_radius = 0.20
+        disk.height = 0.04
+        disk.radial_segments = 14
+        disk.material = _mate_tir(Color(0.45, 0.44, 0.43), 0.45)
+        var kaliper := BoxMesh.new()
+        kaliper.size = Vector3(0.05, 0.12, 0.09)
+        var kmat := _mate_tir(Color(0.72, 0.08, 0.06), 0.45)
+        # لاینر تیره‌ی گلگیر — حلقه‌ی سایه‌مانند پشت چرخ
+        var liner := CylinderMesh.new()
+        liner.top_radius = 0.41
+        liner.bottom_radius = 0.41
+        liner.height = 0.14
+        liner.radial_segments = 12
+        liner.material = _mate_tir(Color(0.045, 0.045, 0.05), 0.95)
+        for wp in [Vector3(0.80, wr, 1.45), Vector3(-0.80, wr, 1.45), Vector3(0.80, wr, -1.45), Vector3(-0.80, wr, -1.45)]:
                 var wh := Node3D.new()
                 rishe.add_child(wh)
                 wh.position = wp
+                var lin := MeshInstance3D.new()
+                lin.mesh = liner
+                lin.rotation_degrees = Vector3(0, 0, 90)
+                lin.position = Vector3(-signf(wp.x) * 0.055, 0.05, 0)
+                rishe.add_child(lin)
                 var lastik := MeshInstance3D.new()
                 lastik.mesh = lastik_tori
                 lastik.material_override = wmat2
@@ -1565,6 +1642,27 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
                 ring2.mesh = ring
                 ring2.rotation_degrees = Vector3(0, 0, 90)
                 wh.add_child(ring2)
+                # پنج پره — هر پره یک جعبه‌ی باریک چرخیده دور محور
+                for p in 5:
+                        var gooshe := p * TAU / 5.0
+                        var pare := MeshInstance3D.new()
+                        var bm2 := BoxMesh.new()
+                        bm2.size = Vector3(0.16, 0.135, 0.042)
+                        bm2.material = _mate_tir(Color(0.56, 0.58, 0.62), 0.28)
+                        pare.mesh = bm2
+                        pare.position = Vector3(0, cos(gooshe) * 0.10, sin(gooshe) * 0.10)
+                        pare.rotation.x = -gooshe
+                        wh.add_child(pare)
+                var disk2 := MeshInstance3D.new()
+                disk2.mesh = disk
+                disk2.rotation_degrees = Vector3(0, 0, 90)
+                disk2.position = Vector3(-signf(wp.x) * 0.03, 0, 0)
+                wh.add_child(disk2)
+                var kal := MeshInstance3D.new()
+                kal.mesh = kaliper
+                kal.material_override = kmat
+                kal.position = Vector3(-signf(wp.x) * 0.05, 0.16, 0.12 if wp.z > 0 else -0.12)
+                wh.add_child(kal)
                 var hub2 := MeshInstance3D.new()
                 hub2.mesh = hub
                 hub2.rotation_degrees = Vector3(0, 0, 90)
@@ -1612,6 +1710,7 @@ func _mashin_bepar() -> void:
         semat = atan2(MAMASHA[0].x, MAMASHA[0].z)
         mashin.position = ja
         mashin.rotation.y = semat
+        _saye_zir(mashin)
         mashin.add_child(_cheraghe_jelo())
         # دود لاستیک
         dood = CPUParticles3D.new()
@@ -1632,6 +1731,7 @@ func _mashin_bepar() -> void:
         for r in 3:
                 var rr := _mashin_besaz(RANG_RAQIBHA[r % RANG_RAQIBHA.size()], "sport", false)
                 add_child(rr["root"])
+                _saye_zir(rr["root"])
                 raqibha.append({"root": rr["root"], "wheels": rr["wheels"], "s": 10.0 + 6.0 * r,
                         "lat": (2.6 if r % 2 == 0 else -2.6), "vf": 0.0,
                         "skill": float(tarjome["skill"]) * (1.0 - 0.045 * r),
@@ -1657,6 +1757,127 @@ func _mostati_dood() -> Mesh:
         smat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
         qm.material = smat
         return qm
+
+# ── سایه‌ی تماس زیر ماشین — بدون این، ماشین «شناور» دیده می‌شود ──
+var bafte_saye: ImageTexture = null
+
+func _bafte_saye_zir() -> ImageTexture:
+        if bafte_saye != null:
+                return bafte_saye
+        var aks := Image.create(128, 64, false, Image.FORMAT_RGBA8)
+        for y in 64:
+                for x in 128:
+                        var u := (x - 64.0) / 58.0
+                        var v := (y - 32.0) / 27.0
+                        var d := u * u + v * v
+                        var alfa := clampf(1.0 - d, 0.0, 1.0)
+                        aks.set_pixel(x, y, Color(0.02, 0.02, 0.03, alfa * alfa * 0.66))
+        bafte_saye = ImageTexture.create_from_image(aks)
+        return bafte_saye
+
+func _saye_zir(rishe: Node3D) -> void:
+        var q := QuadMesh.new()
+        q.size = Vector2(2.7, 5.1)
+        var m := StandardMaterial3D.new()
+        m.albedo_texture = _bafte_saye_zir()
+        m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+        m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+        q.material = m
+        var mi := MeshInstance3D.new()
+        mi.mesh = q
+        mi.rotation_degrees = Vector3(-90, 0, 0)
+        mi.position = Vector3(0, 0.028, 0)
+        mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+        rishe.add_child(mi)
+
+# ── ماشین‌های پارک‌شده‌ی خیابانی — سیلوئت ساده، روح شهر ──
+func _mashin_sade(rang: Color) -> Node3D:
+        var rishe := Node3D.new()
+        var pm := _mate_rang(rang, 0.35)
+        var ist := [
+                [-2.05, 0.30, 0.74, 0.70, 0.86],
+                [-1.55, 0.25, 0.80, 0.82, 0.94],
+                [-0.60, 0.24, 0.80, 0.84, 0.94],
+                [ 0.50, 0.24, 0.78, 0.82, 0.90],
+                [ 1.40, 0.25, 0.74, 0.78, 0.78],
+                [ 2.05, 0.29, 0.70, 0.68, 0.70],
+        ]
+        var halqeha := []
+        for s in ist:
+                halqeha.append(_halqeh_badane(s[0], s[1], s[2], s[3], s[4]))
+        var st := SurfaceTool.new()
+        st.begin(Mesh.PRIMITIVE_TRIANGLES)
+        _loft_bede(st, halqeha)
+        st.generate_normals()
+        var badane := MeshInstance3D.new()
+        badane.mesh = st.commit()
+        badane.material_override = pm
+        rishe.add_child(badane)
+        var kist := [[-0.90, 0.86, 0.60, 0.98], [-0.20, 0.84, 0.56, 1.24], [0.45, 0.82, 0.53, 1.10], [0.95, 0.79, 0.50, 0.84]]
+        var hk := []
+        for s2 in kist:
+                hk.append(_halqeh_kabin(s2[0], s2[1], s2[2], s2[3]))
+        var st2 := SurfaceTool.new()
+        st2.begin(Mesh.PRIMITIVE_TRIANGLES)
+        _loft_bede(st2, hk)
+        st2.generate_normals()
+        var kabin := MeshInstance3D.new()
+        kabin.mesh = st2.commit()
+        kabin.material_override = _mate_tir(Color(0.05, 0.07, 0.10), 0.18)
+        rishe.add_child(kabin)
+        var tori := TorusMesh.new()
+        tori.inner_radius = 0.15
+        tori.outer_radius = 0.33
+        tori.rings = 14
+        tori.ring_segments = 8
+        var tm := _mate_tir(Color(0.08, 0.08, 0.085), 0.9)
+        var dic := CylinderMesh.new()
+        dic.top_radius = 0.16
+        dic.bottom_radius = 0.16
+        dic.height = 0.13
+        dic.radial_segments = 10
+        dic.material = _mate_tir(Color(0.35, 0.36, 0.38), 0.5)
+        for wp in [Vector3(0.78, 0.33, 1.38), Vector3(-0.78, 0.33, 1.38), Vector3(0.78, 0.33, -1.38), Vector3(-0.78, 0.33, -1.38)]:
+                var wh := Node3D.new()
+                wh.position = wp
+                rishe.add_child(wh)
+                var t1 := MeshInstance3D.new()
+                t1.mesh = tori
+                t1.material_override = tm
+                t1.rotation_degrees = Vector3(0, 0, 90)
+                wh.add_child(t1)
+                var d1 := MeshInstance3D.new()
+                d1.mesh = dic
+                d1.rotation_degrees = Vector3(0, 0, 90)
+                wh.add_child(d1)
+        _saye_zir(rishe)
+        return rishe
+
+func _mashinha_park(tasadof: RandomNumberGenerator) -> void:
+        var h: float = tarjome["half"]
+        var rangha := [Color(0.88, 0.88, 0.90), Color(0.72, 0.73, 0.75), Color(0.16, 0.17, 0.19),
+                Color(0.30, 0.34, 0.40), Color(0.55, 0.56, 0.58), Color(0.45, 0.22, 0.18), Color(0.24, 0.34, 0.24)]
+        var shomare := 0
+        var i := 20
+        while i < NEMOONE_N - 20:
+                if tasadof.randf() < 0.40:
+                        i += 14
+                        shomare += 1
+                        continue
+                var kenar := 1.0 if shomare % 2 == 0 else -1.0
+                var pi: int = (i + tasadof.randi() % 6) % NEMOONE_N
+                var pp: Vector3 = NEMOONEHA[pi] + NORMLHA[pi] * kenar * (h + 1.95)
+                if _kamtarin_fasele(pp) < h + 1.2:
+                        i += 14
+                        shomare += 1
+                        continue
+                var mc := _mashin_sade(rangha[tasadof.randi() % rangha.size()])
+                mc.position = Vector3(pp.x, 0.12, pp.z)  # روی پیاده‌رو می‌ایستد
+                mc.rotation.y = atan2(MAMASHA[pi].x, MAMASHA[pi].z) + (PI if tasadof.randf() < 0.4 else 0.0)
+                add_child(mc)
+                _khane_efe(pp.x, pp.z, 1.3)
+                shomare += 1
+                i += 14
 
 func _cheraghe_jelo() -> Node3D:
         var n := Node3D.new()
@@ -1884,7 +2105,8 @@ func _hasteye_dorbin(dt: float) -> void:
         zavie_dorbin = lerpf(zavie_dorbin, zavie_hadaf, 1.0 - exp(-5.0 * dt))
         dorbin.fov = zavie_dorbin
         if javane_khat != null:
-                var tond := clampf((absf(v_jelo) - 26.0) / 20.0, 0.0, 0.65)
+                # خطوط تندباد فقط در سرعت بالا — پایین آوردن آستانه، کل کادر را آشغال می‌کند
+                var tond := clampf((absf(v_jelo) - 38.0) / 22.0, 0.0, 0.6)
                 if nitro_rushan and nitro > 0.0:
                         tond = maxf(tond, 0.85)
                 javane_khat.set_shader_parameter("tavan", tond)
@@ -2082,7 +2304,7 @@ void fragment() {
         m = pow(m, 7.0);
         float hazhe = smoothstep(0.45, 1.15, r);
         vec3 rang = mix(vec3(0.85, 0.93, 1.0), vec3(0.55, 0.75, 1.0), m);
-        COLOR = vec4(rang, m * hazhe * tavan * 0.6);
+        COLOR = vec4(rang, m * hazhe * tavan * 0.45);
 }
 """
         javane_khat.shader = shd
@@ -2438,7 +2660,7 @@ func _tike_test(dt: float) -> void:
 
 var aks_tamaam := {}
 func _tike_aks() -> void:
-        var neshanha := [[1.7, "countdown"], [3.7, "chase"], [5.0, "drift"], [7.9, "nitro"], [11.5, "city"]]
+        var neshanha := [[1.7, "countdown"], [4.6, "chase"], [5.8, "drift"], [7.9, "nitro"], [11.5, "city"]]
         for m in neshanha:
                 var tt: float = m[0]
                 var nm: String = m[1]
