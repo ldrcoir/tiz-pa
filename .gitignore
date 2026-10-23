@@ -1,0 +1,23 @@
+# godot
+game/.godot/
+game/android/build/
+
+# بیلد و خروجی‌ها — فقط ریشه، نه game/scripts
+/build/
+/download/*.idsig
+*.idsig
+/upload/
+/docs/
+# ابزارها و چیزهای لوکال — اسلش اول یعنی فقط پوشه‌ی ابزار ریشه
+/tools/
+/scripts/
+/skills/
+/keys/
+# سیستمی
+*.tmp
+.DS_Store
+# لوکال
+.env
+worklog.md
+# خروجی ابزارها
+tool-results/

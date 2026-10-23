@@ -1,0 +1,46 @@
+; Engine configuration file - Boghi City Tour
+config_version=5
+
+[application]
+
+config/name="تیز پا"
+run/main_scene="res://scenes/boot.tscn"
+config/features=PackedStringArray("4.7")
+boot_splash/bg_color=Color(0.117647, 0.0705882, 0.0392157, 1)
+boot_splash/show_image=true
+boot_splash/image="res://assets/sprites/splash.png"
+boot_splash/fullsize=false
+config/icon="res://icon.png"
+
+[autoload]
+
+Koli="*res://scripts/globals.gd"
+Seda="*res://scripts/audio_mgr.gd"
+
+[debug]
+
+file_logging/enable_file_logging=true
+file_logging/enable_file_logging.pc=true
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=0
+
+[internationalization]
+
+locale/layout_direction=2
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+
