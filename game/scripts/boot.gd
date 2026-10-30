@@ -56,16 +56,11 @@ func _matn_besaz(matn: String, size: int) -> Label:
 func _bargard_be_menu() -> void:
         await get_tree().process_frame
         await get_tree().process_frame
-        # مسیر مستقیم برای تست/دمو: --story یا --storytest → هاب زندگی محله
-        # --autotest-full / --shots / --playtest → مستقیم مسابقه
+        # مسیر مستقیم برای تست/دمو: --autotest-full / --shots / --playtest → مستقیم مسابقه
         var arg_line := OS.get_cmdline_user_args()
         var masire_sahne := "res://scenes/menu.tscn"
-        if arg_line.has("--story") or arg_line.has("--storytest"):
-                masire_sahne = "res://scenes/story.tscn"
-        elif arg_line.has("--autotest-full") or arg_line.has("--shots") or arg_line.has("--playtest"):
+        if arg_line.has("--autotest-full") or arg_line.has("--shots") or arg_line.has("--playtest"):
                 masire_sahne = "res://scenes/game.tscn"
-        elif arg_line.has("--garage"):
-                masire_sahne = "res://scenes/garage.tscn"
         var basteh: PackedScene = load(masire_sahne)
         if basteh == null:
                 _shekast("صحنه پیدا نشد: " + masire_sahne)
@@ -87,10 +82,6 @@ func _bargard_be_menu() -> void:
         # حیاتی: منو باید صحنه‌ی رسمی درخت شود؛ وگرنه change_scene_to_fileها بی‌صدا شکست می‌خورند
         get_tree().current_scene = nemone
         print("[tizpa][boot] current_scene -> ", masire_sahne.get_file(), " OK")
-        # تست سلامت خزانه BVAULT — خرابی استریم کلید همین‌جا در لاگ دیده می‌شود
-        var GANJE = load("res://scripts/asset_vault.gd")
-        if GANJE != null and not GANJE.self_test():
-                print("[tizpa][boot] BVAULT SELF-TEST FAILED — محتوای رمزی سالم باز نمی‌شود!")
         var tw := create_tween()
         tw.tween_property(self, "modulate:a", 0.0, 0.3)
         tw.tween_callback(queue_free)

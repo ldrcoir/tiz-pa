@@ -331,7 +331,7 @@ func _kahrome_pool() -> void:
         add_child(qabze_chip)
         gerehaye_onvan.append(qabze_chip)
 
-# کارت ماشین — سمت چپ، لبه‌های محو داخل خودِ عکس
+# کارت قهرمان — هلیا باحجاب + ماشین مسابقه، سمت چپ کادر
 func _hero_besaz() -> void:
         var teks_hero := _khandane_amn("res://assets/sprites/menu_hero.webp")
         if teks_hero == null:
@@ -340,10 +340,10 @@ func _hero_besaz() -> void:
         ghahreman.texture = teks_hero
         ghahreman.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
         ghahreman.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-        ghahreman.anchor_left = 0.01
-        ghahreman.anchor_right = 0.60
-        ghahreman.anchor_top = 0.30
-        ghahreman.anchor_bottom = 0.98
+        ghahreman.anchor_left = 0.0
+        ghahreman.anchor_right = 0.62
+        ghahreman.anchor_top = 0.24
+        ghahreman.anchor_bottom = 0.99
         ghahreman.mouse_filter = Control.MOUSE_FILTER_IGNORE
         add_child(ghahreman)
         mashinaye_shahr.append(ghahreman)
@@ -378,15 +378,6 @@ func _setune_dokmeha() -> void:
         dokme_bazi = dokme_shoroo
         dokme_shoroo.size_flags_vertical = Control.SIZE_EXPAND_FILL
         hb.add_child(dokme_shoroo)
-
-        var dokme_garaj := _dokme_besaz("کارگاه", 26, "dark", 76)
-        dokme_garaj.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/garage.tscn"))
-        dokme_garaj.size_flags_vertical = Control.SIZE_EXPAND_FILL
-        hb.add_child(dokme_garaj)
-
-        var dokme_zendegi := _dokme_besaz("زندگی محله", 24, "dark", 64)
-        dokme_zendegi.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/story.tscn"))
-        hb.add_child(dokme_zendegi)
 
         var satr_paein := HBoxContainer.new()
         satr_paein.add_theme_constant_override("separation", 10)
@@ -609,10 +600,10 @@ func _panele_etelaat_besaz() -> void:
         asb.content_margin_top = 18.0
         asb.content_margin_bottom = 18.0
         panel_darbare.add_theme_stylebox_override("panel", asb)
-        panel_darbare.anchor_left = 0.16
-        panel_darbare.anchor_right = 0.84
-        panel_darbare.anchor_top = 0.24
-        panel_darbare.anchor_bottom = 0.72
+        panel_darbare.anchor_left = 0.14
+        panel_darbare.anchor_right = 0.86
+        panel_darbare.anchor_top = 0.13
+        panel_darbare.anchor_bottom = 0.87
         var av := VBoxContainer.new()
         av.add_theme_constant_override("separation", 14)
         av.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -621,6 +612,20 @@ func _panele_etelaat_besaz() -> void:
         at.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         at.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         av.add_child(at)
+        # سازندگان بازی — سفارش اهل خانه
+        var satrha := [
+                ["هلیا موزونی", 34, RANG_KERM],
+                ["مدرسه شهید دخانچی", 26, Color(0.85, 0.87, 0.92)],
+                ["پژوهشسرای امام هادی (ع)", 26, Color(0.85, 0.87, 0.92)],
+                ["استاد راهنما: مهندس احسان مراد", 26, RANG_TALA],
+        ]
+        for satr in satrha:
+                var khat := _matn_besaz(satr[0], satr[1], true, false, satr[2])
+                khat.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+                khat.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+                khat.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+                khat.add_theme_constant_override("outline_size", 4)
+                av.add_child(khat)
         var ab := _dokme_besaz(Koli.tarjome("back"), 26, "dark", 64)
         ab.pressed.connect(func(): _neshon_bede(panel_home))
         av.add_child(ab)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dc3wh6vrj6ogg"
-path="res://.godot/imported/flame.png-2861d4cb71e36f5ffdecd2d967caf9b7.ctex"
+uid="uid://duq5neqqhix0i"
+path="res://.godot/imported/afagh_ghorub.jpg-075c94864b06616a7ebf697199c24f39.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/flame.png"
-dest_files=["res://.godot/imported/flame.png-2861d4cb71e36f5ffdecd2d967caf9b7.ctex"]
+source_file="res://assets/textures/afagh_ghorub.jpg"
+dest_files=["res://.godot/imported/afagh_ghorub.jpg-075c94864b06616a7ebf697199c24f39.ctex"]
 
 [params]
 

@@ -2,22 +2,22 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmpf3gfwfdc8o"
-path="res://.godot/imported/garage_bg.webp-df9ab745dfd3cd6f7f413c87349b50e0.ctex"
+uid="uid://dp7snr8pslu8u"
+path="res://.godot/imported/afagh.jpg-decbb306b81ee15d8799bea356629c28.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/garage_bg.webp"
-dest_files=["res://.godot/imported/garage_bg.webp-df9ab745dfd3cd6f7f413c87349b50e0.ctex"]
+source_file="res://assets/textures/afagh.jpg"
+dest_files=["res://.godot/imported/afagh.jpg-decbb306b81ee15d8799bea356629c28.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=0
 compress/high_quality=false
-compress/lossy_quality=0.8
+compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

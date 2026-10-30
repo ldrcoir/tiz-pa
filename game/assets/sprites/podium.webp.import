@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mogyichmu4dc"
-path="res://.godot/imported/helia.webp-5ab047896be2234fd04efa20e6c8c30b.ctex"
+uid="uid://cm6ltsv0xc76d"
+path="res://.godot/imported/podium.webp-47fd1af8d131bb7683d5d5a98b002641.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/helia.webp"
-dest_files=["res://.godot/imported/helia.webp-5ab047896be2234fd04efa20e6c8c30b.ctex"]
+source_file="res://assets/sprites/podium.webp"
+dest_files=["res://.godot/imported/podium.webp-47fd1af8d131bb7683d5d5a98b002641.ctex"]
 
 [params]
 
