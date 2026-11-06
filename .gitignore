@@ -7,10 +7,9 @@ game/android/build/
 /download/*.idsig
 *.idsig
 /upload/
-/docs/
 # ابزارها و چیزهای لوکال — اسلش اول یعنی فقط پوشه‌ی ابزار ریشه
 /tools/
-/scripts/
+/scripts/*.png
 /skills/
 /keys/
 # سیستمی

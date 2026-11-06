@@ -3,8 +3,8 @@ extends Node
 const MASIRE_ZAKHIRE := "user://tizpa_save.json"
 
 # نسخه‌ی بازی — همه‌جا از همین خونده می‌شه
-const NOSKHE := "0.13"
-const SAKHT := 21
+const NOSKHE := "0.1"
+const SAKHT := 1
 
 var pool: int = 0
 var esme_pelak: String = "هلیا"
@@ -23,16 +23,16 @@ var entezare_anlan: float = 15.0
 const MASHINHA := [
         {
                 "id": "boghi", "name": "تیز پا", "en": "Tiz Pa",
-                "desc": "ماشین تو — قرمز، سبک و همیشه گرسنه‌ی سبقت!",
-                "tex": "res://assets/sprites/car_boghi.webp",
-                "rang": "#c8141e",
+                "desc": "ماشین تو — زردِ خورشیدی، مثل نقاشی؛ سریع و گرسنه‌ی سبقت!",
+                "tex": "res://assets/sprites/car_boghi_yellow.webp",
+                "rang": "#f2b307",
                 "jump": 1.0, "accel": 1.0, "tough": 1.0, "price": 0
         },
         {
-                "id": "boghi_yellow", "name": "تیز پا زرد", "en": "Tiz Pa Sun",
-                "desc": "همان رفیق آفتابی — لبخند به رنگ خورشید!",
-                "tex": "res://assets/sprites/car_boghi_yellow.webp",
-                "rang": "#e8a018",
+                "id": "boghi_red", "name": "تیز پا سرخ", "en": "Tiz Pa Red",
+                "desc": "همان رفیق قدیمی — این بار با رنگ آتش!",
+                "tex": "res://assets/sprites/car_boghi.webp",
+                "rang": "#c8141e",
                 "jump": 1.05, "accel": 1.08, "tough": 0.92, "price": 800
         },
         {

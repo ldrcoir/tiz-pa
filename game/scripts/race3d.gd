@@ -1305,41 +1305,103 @@ func _bonaye_azadi() -> void:
         _khane_efe(0, 0, 17.0)
         print("[tizpa][race] azadi monument placed")
 
+var cheragh_milad: MeshInstance3D = null   # چراغ سرخ بالای دکل — تپنده
+var zamane_milad := 0.0
+
 func _borje_milad(tasadof: RandomNumberGenerator) -> void:
-        # سیلوئت برج میلاد در دوردست (بیرون از مسیر — فقط دکور)
-        var a := tasadof.randf_range(0, TAU)
-        var paye := Vector3(cos(a) * 620, 0, sin(a) * 620)
-        var cmat := StandardMaterial3D.new()
-        cmat.albedo_color = Color(0.80, 0.80, 0.82)
-        var mehvar := CylinderMesh.new()
-        mehvar.top_radius = 3.2
-        mehvar.bottom_radius = 7.5
-        mehvar.height = 180.0
-        mehvar.radial_segments = 10
-        var sm := MeshInstance3D.new()
-        sm.mesh = mehvar
-        sm.material_override = cmat
-        sm.position = paye + Vector3(0, 90, 0)
-        add_child(sm)
-        var sar := CylinderMesh.new()
-        sar.top_radius = 2.2
-        sar.bottom_radius = 13.0
-        sar.height = 26.0
-        sar.radial_segments = 10
-        var hm := MeshInstance3D.new()
-        hm.mesh = sar
-        hm.material_override = cmat
-        hm.position = paye + Vector3(0, 190, 0)
-        add_child(hm)
+        # برج میلاد — دیگر یک سیاه‌سیلوئت مبهم نیست:
+        # مغز باریک‌شو + سرِ شکافته‌ی معروف که بیرون می‌زند + نوارهای نورانی + دکل و چراغ سرخ
+        # جای ثابت و رو به جاده — در بیشتر مسیر توی کادر است
+        var g := Node3D.new()
+        g.position = Vector3(-430, 0, 40)
+        add_child(g)
+        var beton := StandardMaterial3D.new()
+        beton.albedo_color = Color(0.91, 0.90, 0.87)
+        beton.roughness = 0.62
+        # فلودایت — برج شب‌های تهران روشن است؛ در روز هم از پس مه بیرون می‌زند
+        beton.emission_enabled = true
+        beton.emission = Color(0.88, 0.85, 0.74)
+        beton.emission_energy_multiplier = 0.26
+        # طبقه‌های سر برج — همان پله‌ی بیرون‌زده که امضای میلاد است
+        var tabagheha := [
+                [7.5, 4.4, 150.0, 75.0],   # مغز
+                [10.5, 10.5, 7.0, 153.5],  # لابی سر برج
+                [13.0, 16.0, 11.0, 162.5], # عرشجه — بیرون‌زدگی معروف
+                [15.5, 9.0, 8.0, 172.0],   # داخل‌شونده
+                [8.0, 5.5, 6.0, 179.0],
+        ]
+        for t in tabagheha:
+                var mehvar := CylinderMesh.new()
+                mehvar.top_radius = float(t[0])
+                mehvar.bottom_radius = float(t[1])
+                mehvar.height = float(t[2])
+                mehvar.radial_segments = 14
+                var sm := MeshInstance3D.new()
+                sm.mesh = mehvar
+                sm.material_override = beton
+                sm.position = Vector3(0, float(t[3]), 0)
+                g.add_child(sm)
+        # دو نوار شیشه‌ی روشن — پنجره‌های گرم عرشجه؛ از کیلومترها دور دیده می‌شوند
+        var nur := StandardMaterial3D.new()
+        nur.albedo_color = Color(1.0, 0.92, 0.70)
+        nur.emission_enabled = true
+        nur.emission = Color(1.0, 0.86, 0.52)
+        nur.emission_energy_multiplier = 1.9
+        for nr in [[15.3, 165.0, 2.2], [13.4, 168.4, 1.4]]:
+                var navar := CylinderMesh.new()
+                navar.top_radius = float(nr[0])
+                navar.bottom_radius = float(nr[0])
+                navar.height = float(nr[2])
+                navar.radial_segments = 14
+                var nm := MeshInstance3D.new()
+                nm.mesh = navar
+                nm.material_override = nur
+                nm.position = Vector3(0, float(nr[1]), 0)
+                g.add_child(nm)
+        # دکل بلند — نق معروف آسمان شمال تهران
+        var tir := StandardMaterial3D.new()
+        tir.albedo_color = Color(0.72, 0.73, 0.75)
+        tir.metallic = 0.6
+        tir.roughness = 0.4
         var antn := CylinderMesh.new()
-        antn.top_radius = 0.4
-        antn.bottom_radius = 1.0
-        antn.height = 46.0
+        antn.top_radius = 0.35
+        antn.bottom_radius = 1.1
+        antn.height = 62.0
+        antn.radial_segments = 8
         var am := MeshInstance3D.new()
         am.mesh = antn
-        am.material_override = cmat
-        am.position = paye + Vector3(0, 226, 0)
-        add_child(am)
+        am.material_override = tir
+        am.position = Vector3(0, 213.0, 0)
+        g.add_child(am)
+        # چراغ سرخ بالای دکل — تپنده (در _process بروز می‌شود)
+        var serkh := StandardMaterial3D.new()
+        serkh.albedo_color = Color(0.9, 0.1, 0.08)
+        serkh.emission_enabled = true
+        serkh.emission = Color(1.0, 0.08, 0.05)
+        serkh.emission_energy_multiplier = 1.6
+        var qobe := SphereMesh.new()
+        qobe.radius = 1.6
+        qobe.height = 3.2
+        cheragh_milad = MeshInstance3D.new()
+        cheragh_milad.mesh = qobe
+        var mm2 := StandardMaterial3D.new()
+        mm2.albedo_color = Color(0.9, 0.1, 0.08)
+        mm2.emission_enabled = true
+        mm2.emission = Color(1.0, 0.08, 0.05)
+        mm2.emission_energy_multiplier = 1.6
+        mm2.set_meta("paye", 1.6)
+        cheragh_milad.material_override = mm2
+        cheragh_milad.position = Vector3(0, 245.0, 0)
+        g.add_child(cheragh_milad)
+        print("[tizpa][race] borj-e milad jadid qarar gereft — roshan va ashkara")
+
+func _tike_milad(dt: float) -> void:
+        # تپش چراغ سرخ دکل — آسمان زنده است
+        zamane_milad += dt
+        if cheragh_milad != null and is_instance_valid(cheragh_milad):
+                var m: StandardMaterial3D = cheragh_milad.material_override
+                var paye := float(m.get_meta("paye", 1.6))
+                m.emission_energy_multiplier = paye + 1.1 * (0.5 + 0.5 * sin(zamane_milad * 2.6))
 
 # ═════════════ مخروط‌های راهنما در پیچ‌های تند — بوی پیست دریفت ═════════════
 func _ghootiha(tasadof: RandomNumberGenerator) -> void:
@@ -1636,7 +1698,113 @@ func _loft_bede(st: SurfaceTool, halqeha: Array, sar_bastan := true) -> void:
                                 else:
                                         st.add_vertex(m); st.add_vertex(h[j]); st.add_vertex(h[j2])
 
+# ═══════════════════ ماشین واقعی — سدان مدل‌شده در بلندر (GLB) ═══════════════════
+# نقاشی زرد کاربر دیگر نباید در بازی دو مستطیل و دو دایره شود — مدل واقعی با قوس گلگیر،
+# شیشه‌ی دودی، رینگ تیره و پلاک تهران ۱۱ همین‌جا می‌آید
+var _sahne_glb: PackedScene = null
+var _bafte_pelak: Texture2D = null
+
+func _sahne_mashin() -> PackedScene:
+        if _sahne_glb == null and ResourceLoader.exists("res://assets/models/tizpa.glb"):
+                _sahne_glb = load("res://assets/models/tizpa.glb")
+        return _sahne_glb
+
 func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictionary:
+        var sahne := _sahne_mashin()
+        if sahne != null:
+                return _mashin_az_glb(sahne, rang, with_driver)
+        # اگر مدل بلندر نبود — سازنده‌ی قدیمی هست تا بازی هیچ‌وقت نشکند
+        return _mashin_besaz_pishrafte(rang, kind, with_driver)
+
+func _mashin_az_glb(sahne: PackedScene, rang: Color, with_driver: bool) -> Dictionary:
+        var rishe: Node3D = sahne.instantiate()
+        var pm := _mate_rang(rang)
+        # فقط صفحاتِ رنگ‌بدنه بازرنگ می‌شوند — شیشه دودی، رینگ تیره و چراغ‌ها دست‌نخورده
+        for mi in rishe.find_children("*", "MeshInstance3D", true, false):
+                var mesh: Mesh = mi.mesh
+                if mesh == null:
+                        continue
+                for s in mesh.get_surface_count():
+                        var mate := mesh.surface_get_material(s)
+                        if mate != null and mate.resource_name == "rang_badane":
+                                mi.set_surface_override_material(s, pm)
+        var khoruj := {"root": rishe, "wheels": [], "front": [], "paint": pm}
+        for gera in rishe.find_children("charkh_*", "Node3D", true, false):
+                khoruj["wheels"].append(gera)
+                if String(gera.name).begins_with("charkh_jelo"):
+                        khoruj["front"].append(gera)
+        _pelak_bede(rishe)
+        if with_driver:
+                _ranande_bedeh(rishe)
+        # شعله‌ی نیترو — روی اگزوز کرومِ سدان
+        var shole := MeshInstance3D.new()
+        var makute := CylinderMesh.new()
+        makute.top_radius = 0.02
+        makute.bottom_radius = 0.14
+        makute.height = 0.9
+        makute.radial_segments = 6
+        var fm := StandardMaterial3D.new()
+        fm.albedo_color = Color(1.0, 0.6, 0.15)
+        fm.emission_enabled = true
+        fm.emission = Color(1.0, 0.55, 0.1)
+        fm.emission_energy_multiplier = 2.2
+        shole.mesh = makute
+        shole.material_override = fm
+        shole.rotation_degrees = Vector3(-90, 0, 0)
+        shole.position = Vector3(-0.48, 0.30, -2.42)
+        shole.visible = false
+        rishe.add_child(shole)
+        khoruj["flame"] = shole
+        return khoruj
+
+func _pelak_bede(rishe: Node3D) -> void:
+        # پلاک تهران ۱۱ — جلو روی سپر، عقب روی صندوق؛ مثل همه‌ی ماشین‌های واقعی خیابان
+        if _bafte_pelak == null:
+                var masir := "res://assets/textures/pelak_tehran.png"
+                if not ResourceLoader.exists(masir):
+                        return
+                _bafte_pelak = load(masir)
+        var m := StandardMaterial3D.new()
+        m.albedo_texture = _bafte_pelak
+        m.roughness = 0.45
+        m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+        var shomare_pelak := 0
+        for qarar in [Vector3(0, 0.44, 2.335), Vector3(0, 0.52, -2.34)]:
+                var q := QuadMesh.new()
+                q.size = Vector2(0.50, 0.106)
+                q.material = m
+                var mi := MeshInstance3D.new()
+                mi.mesh = q
+                mi.position = qarar
+                if shomare_pelak == 1:
+                        mi.rotation.y = PI   # پلاک عقب رو به عقب
+                shomare_pelak += 1
+                rishe.add_child(mi)
+
+func _ranande_bedeh(rishe: Node3D) -> void:
+        # راننده — هلیا با مقنعه، پشت فرمان؛ از شیشه‌ی دودی سیلوئتش پیداست
+        var ranande := Node3D.new()
+        rishe.add_child(ranande)
+        ranande.position = Vector3(0, 0.58, 0.28)
+        var sar := SphereMesh.new()
+        sar.radius = 0.12
+        sar.height = 0.24
+        var hm2 := MeshInstance3D.new()
+        hm2.mesh = sar
+        hm2.material_override = _mate_tir(Color(0.85, 0.62, 0.48))
+        hm2.position = Vector3(0, 0.34, 0.02)
+        ranande.add_child(hm2)
+        var mag := SphereMesh.new()
+        mag.radius = 0.155
+        mag.height = 0.31
+        var gm2 := MeshInstance3D.new()
+        gm2.mesh = mag
+        gm2.material_override = _mate_tir(Color(0.16, 0.28, 0.32))
+        gm2.position = Vector3(0, 0.27, 0.06)
+        ranande.add_child(gm2)
+        _qute(ranande, Vector3(0.42, 0.26, 0.20), Vector3(0, 0.06, 0), _mate_tir(Color(0.25, 0.32, 0.38)))
+
+func _mashin_besaz_pishrafte(rang: Color, kind := "sport", with_driver := false) -> Dictionary:
         var rishe := Node3D.new()
         var pm := _mate_rang(rang)
         var shishe := StandardMaterial3D.new()
@@ -2234,7 +2402,7 @@ func _hasteye_fizik(dt: float) -> void:
         mashin.position = ja
         mashin.rotation.y = semat
         for w in lastikha:
-                w.rotation.x -= v_jelo * dt / 0.34
+                w.rotation.x += v_jelo * dt / 0.34
         for w in lastikaye_jelo:
                 w.rotation.y = ferman * 0.9
         dood.emitting = dar_darift
@@ -2316,6 +2484,8 @@ func _keshidan_jigh() -> void:
 
 # ═══════════════════ دوربین تعقیبی — قلب NFS ═══════════════════
 func _hasteye_dorbin(dt: float) -> void:
+        if dorbin_qafel:
+                return   # عکس مخصوص میلاد — دوربین دست‌کاری شده، دست نزن
         if dorbin == null:
                 dorbin = Camera3D.new()
                 dorbin.fov = 72.0
@@ -2422,7 +2592,7 @@ func _hasteye_raqibha(dt: float) -> void:
                 if float(rv["vf"]) > 0.5:
                         rishe.rotation.y = atan2(MAMASHA[i2].x, MAMASHA[i2].z)
                 for wh in rv["wheels"]:
-                        wh.rotation.x -= float(rv["vf"]) * dt / 0.34
+                        wh.rotation.x += float(rv["vf"]) * dt / 0.34
         # جایگاه — فقط در حال مسابقه؛ در «پایان» قفل می‌ماند تا رقیب‌های پشت سر
         # در لحظه‌ی تعویق پنل، جای اول را ندزدند (باگ قدیمی سکوی قهرمانی)
         if halat == "race":
@@ -2984,6 +3154,7 @@ func _process(dt: float) -> void:
                 _hasteye_raqibha(dt)
         _hasteye_dorbin(dt)
         _hasteye_hud()
+        _tike_milad(dt)
         _tike_azm_ertebat(dt)
 
 func _voroode_mosabeqe() -> void:
@@ -3124,6 +3295,22 @@ func _tike_aks() -> void:
                         var masir := "/tmp/shot_" + nm + ".png"
                         aks.save_png(masir)
                         print("[tizpa][race] SHOT ", nm, " -> ", masir)
-        if t_test > 20.5:
+        if t_test > 20.5 and not aks_tamaam.has("milad"):
+                aks_tamaam["milad"] = true
+                _akse_milad()
+        if t_test > 23.0:
                 print("[tizpa][race] SHOTS DONE")
                 get_tree().quit()
+
+var dorbin_qafel := false
+func _akse_milad() -> void:
+        # عکس مخصوص برج میلاد — دوربین را دستی رو به برج می‌گذاریم تا مطمئن شویم دیده می‌شود
+        dorbin_qafel = true
+        dorbin.position = ja + Vector3(-90, 42, 55)
+        dorbin.look_at(Vector3(-430, 125, 40), Vector3.UP)
+        await RenderingServer.frame_post_draw
+        await RenderingServer.frame_post_draw
+        var aks := get_viewport().get_texture().get_image()
+        if aks != null:
+                aks.save_png("/tmp/shot_milad.png")
+                print("[tizpa][race] SHOT milad -> /tmp/shot_milad.png")
