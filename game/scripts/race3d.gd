@@ -13,7 +13,7 @@ const MARHALEHA := [
                         Vector3(255, 0, -20), Vector3(190, 0, 130), Vector3(40, 0, 200),
                         Vector3(-150, 0, 180), Vector3(-255, 0, 40),
                 ],
-                "trees": 1.0, "bazaar": 0.0, "landmark": "milad",
+                "trees": 0.55, "bazaar": 0.0, "landmark": "milad",
                 "sky_top": Color(0.22, 0.52, 0.93), "sky_hz": Color(0.74, 0.85, 0.94),
                 "sun": Vector3(-0.5, -0.9, -0.35), "sun_col": Color(1.0, 0.97, 0.88), "sun_e": 1.3,
                 "ground": Color(0.52, 0.50, 0.45), "fog": Color(0.80, 0.86, 0.94), "fog_d": 0.0009,
@@ -45,7 +45,7 @@ const MARHALEHA := [
                         Vector3(290, 0, -60), Vector3(240, 0, 110), Vector3(60, 0, 190),
                         Vector3(-140, 0, 230), Vector3(-300, 0, 90),
                 ],
-                "trees": 0.5, "bazaar": 0.0, "landmark": "milad",
+                "trees": 0.4, "bazaar": 0.0, "landmark": "milad",
                 "sky_top": Color(0.28, 0.52, 0.86), "sky_hz": Color(0.80, 0.87, 0.93),
                 "sun": Vector3(0.4, -0.9, -0.4), "sun_col": Color(1.0, 0.98, 0.90), "sun_e": 1.25,
                 "ground": Color(0.50, 0.49, 0.46), "fog": Color(0.82, 0.88, 0.95), "fog_d": 0.0008,
@@ -60,7 +60,7 @@ const MARHALEHA := [
                         Vector3(195, 0, 0), Vector3(130, 0, 120), Vector3(20, 0, 175),
                         Vector3(-120, 0, 150), Vector3(-200, 0, 30),
                 ],
-                "trees": 0.85, "bazaar": 0.3, "landmark": "",
+                "trees": 0.6, "bazaar": 0.3, "landmark": "",
                 "sky_top": Color(0.36, 0.50, 0.78), "sky_hz": Color(0.98, 0.82, 0.58),
                 "sun": Vector3(0.75, -0.55, 0.35), "sun_col": Color(1.0, 0.83, 0.60), "sun_e": 1.35,
                 "ground": Color(0.55, 0.50, 0.44), "fog": Color(0.95, 0.80, 0.62), "fog_d": 0.0013,
@@ -122,8 +122,12 @@ var ghame_dorbin := 0.0 # خم‌شدن دوربین در پیچ — حس دری
 var seyest := 0.0
 var tamaam_shod := false
 var jaye_payan := 1
-var halat := "count"              # count / race / finish / panel
+var halat := "intro"              # intro / count / race / finish / panel
 var shomarvar := 3.9
+# اینتروی سینمایی: دوربین دور ماشین‌های خط شروع می‌چرخد، بعد پشت ماشین می‌نشیند
+var zamane_introzavie := 5.0
+var zavie_introzavie := 0.0
+var karte_introzavie: Label = null
 
 var raqibha: Array = []            # {root, s, lat, vf, skill, name, paint, wheels}
 var saktha: Array = []            # {x,z,r}
@@ -214,7 +218,91 @@ func _ready() -> void:
         _hud_besaz()
         _azm_ertebat()
         _loding_tamiz()
+        _karte_introzavie_besaz()
+        # صدای بم‌موتور در اینترو — ماشین‌ها روی خط، غرش آماده‌ی پرواز
+        A.motor_bede(true, 0.22)
         print("[tizpa][race] SPAWN OK half=", tarjome["half"], " len=", int(toole_masir))
+
+# کارت اینترو: عنوان درشت + توضیح کوچک + راهنمای چشمک‌زن — بدون شلوغی روی تصویر
+func _karte_introzavie_besaz() -> void:
+        var hud_node := get_node_or_null("HUD")
+        if hud_node == null:
+                return
+        var f_sh := load("res://assets/fonts/Lalezar-Regular.ttf")
+        var f_b := load("res://assets/fonts/Vazirmatn-Bold.ttf")
+        var sh_dakheli := str(int(tarjome["id"]))
+        var fa_sh := ""
+        for ch in sh_dakheli:
+                fa_sh += "۰۱۲۳۴۵۶۷۸۹"[int(ch)] if ch >= "0" and ch <= "9" else ch
+        karte_introzavie = Label.new()
+        karte_introzavie.text = "مرحله‌ی " + fa_sh + "  —  " + str(tarjome["name"])
+        karte_introzavie.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        karte_introzavie.anchor_left = 0.0
+        karte_introzavie.anchor_right = 1.0
+        karte_introzavie.anchor_top = 0.075
+        karte_introzavie.anchor_bottom = 0.20
+        if f_sh != null:
+                karte_introzavie.add_theme_font_override("font", f_sh)
+        karte_introzavie.add_theme_font_size_override("font_size", 60)
+        karte_introzavie.add_theme_color_override("font_color", Color(0.98, 0.86, 0.40))
+        karte_introzavie.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.02, 0.95))
+        karte_introzavie.add_theme_constant_override("outline_size", 13)
+        karte_introzavie.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        hud_node.add_child(karte_introzavie)
+        var zir_karte := Label.new()
+        zir_karte.text = str(tarjome["desc"]) + "\nبرای شروع، همین حالا لمس کن"
+        zir_karte.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        zir_karte.anchor_left = 0.0
+        zir_karte.anchor_right = 1.0
+        zir_karte.anchor_top = 0.195
+        zir_karte.anchor_bottom = 0.30
+        if f_b != null:
+                zir_karte.add_theme_font_override("font", f_b)
+        zir_karte.add_theme_font_size_override("font_size", 24)
+        zir_karte.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
+        zir_karte.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+        zir_karte.add_theme_constant_override("outline_size", 7)
+        zir_karte.add_theme_constant_override("line_spacing", 10)
+        zir_karte.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        karte_introzavie.set_meta("zir", zir_karte)
+        hud_node.add_child(zir_karte)
+        # چشمکِ آرام راهنما — چشم راننده را می‌گیرد
+        var tw := create_tween().set_loops()
+        tw.tween_property(zir_karte, "modulate:a", 0.55, 0.7)
+        tw.tween_property(zir_karte, "modulate:a", 1.0, 0.7)
+
+func _shoroo_shomar() -> void:
+        if halat != "intro":
+                return
+        halat = "count"
+        shomarvar = 3.9
+        set_meta("last_n", -1)
+        if karte_introzavie != null and is_instance_valid(karte_introzavie):
+                var zir: Label = karte_introzavie.get_meta("zir", null)
+                var ghese: Array = [karte_introzavie]
+                if zir != null and is_instance_valid(zir):
+                        ghese.append(zir)
+                var tw := create_tween()
+                tw.set_parallel(true)
+                for g in ghese:
+                        tw.tween_property(g, "modulate:a", 0.0, 0.3)
+                tw.chain().tween_callback(func():
+                        for g2 in ghese:
+                                if is_instance_valid(g2):
+                                        g2.visible = false)
+        print("[tizpa][race] INTRO DONE -> countdown")
+
+# لمس/کلیک در اینترو = رد شدن و شروع فوری شمارش — از _input اصلی صدا زده می‌شود
+func _introzavie_lamse(eroo: InputEvent) -> void:
+        if halat != "intro" or not amade:
+                return
+        var lamse := false
+        if eroo is InputEventScreenTouch and eroo.pressed:
+                lamse = true
+        if eroo is InputEventMouseButton and eroo.pressed:
+                lamse = true
+        if lamse:
+                _shoroo_shomar()
 
 # صفحه‌ی بارگذاری — همان لحظه‌ی ورود به صحنه دیده می‌شود
 func _loding_besaz() -> void:
@@ -799,20 +887,25 @@ func _bafte_maghazi() -> Array: # [albedo, emission]
         var b2 := ImageTexture.create_from_image(tash)
         return [b1, b2]
 
-# چهار جعبه‌ی نمای متفاوت — شهر تک‌رنگ نمی‌ماند
+# هفت جعبه‌ی نمای متفاوت — شهر تک‌رنگ نمی‌ماند؛ مغازه‌های تهران با تابلوی فارسی هم هست
 func _namaha_besaz() -> Array:
-        # پنج عکس نمای واقعی — برج شیشه‌ای/آجری/سنگی/مغازه‌دار/بتنی مدرن
+        # هفت عکس نمای واقعی — برج شیشه‌ای/آجری/سنگی/مغازه‌دار/بتنی مدرن/ردیف مغازه‌ی فارسی/آجری نوساز
         var shishe_b := _tex_bargozar("nam_shishe")
         var ajoori_b := _tex_bargozar("nam_ajoori")
         var gh_b := _tex_bargozar("nam_sangi")
         var maghazi_b := _tex_bargozar("nam_maghazi")
         var modern_b := _tex_bargozar("nam_modern")
+        var maghazi2_b := _tex_bargozar("nam_maghazi2")
+        var ajoori2_b := _tex_bargozar("nam_ajoori2")
         var ferq := [
                 {"bafte": shishe_b if shishe_b != null else _bafte_shishe()[0], "rough": 0.14, "metal": 0.72, "uv": 0.036},
                 {"bafte": ajoori_b if ajoori_b != null else _bafte_ajoori()[0], "rough": 0.95, "metal": 0.0, "uv": 0.055},
                 {"bafte": gh_b if gh_b != null else _bafte_namasakht()[0], "rough": 0.85, "metal": 0.0, "uv": 0.060},
                 {"bafte": maghazi_b if maghazi_b != null else _bafte_maghazi()[0], "rough": 0.9, "metal": 0.0, "uv": 0.085},
                 {"bafte": modern_b if modern_b != null else _bafte_namasakht()[0], "rough": 0.9, "metal": 0.0, "uv": 0.048},
+                # ردیف مغازه‌های تهران با تابلوی فارسیِ واقعی — همکفِ خیابان جان می‌گیرد
+                {"bafte": maghazi2_b, "rough": 0.88, "metal": 0.0, "uv": 0.052},
+                {"bafte": ajoori2_b, "rough": 0.95, "metal": 0.0, "uv": 0.050},
         ]
         var khoruj := []
         for f in ferq:
@@ -875,7 +968,7 @@ func _manzare_besaz() -> void:
         var range_sakhtema: Array = tarjome["bld"]
         # پنج نوع نما — شهر تک‌رنگ و مرده نمی‌ماند
         var quteha: Array = _namaha_besaz()
-        var ghesmatha := [[], [], [], [], []]
+        var ghesmatha := [[], [], [], [], [], [], []]
         var qadam := 3
         var i := 0
         while i < NEMOONE_N:
@@ -893,15 +986,19 @@ func _manzare_besaz() -> void:
                                 no = 0 if tasadof.randf() < 0.75 else 1
                         elif ht < 12.0 and tasadof.randf() < 0.45:
                                 no = 3
-                        elif ht < 17.0 and tasadof.randf() < 0.55:
+                        elif ht < 14.0 and tasadof.randf() < 0.40:
+                                no = 5 # ردیف مغازه‌ی فارسی‌تابلو — نفسِ خیابانِ واقعی
+                        elif ht < 17.0 and tasadof.randf() < 0.50:
                                 no = 4
+                        elif ht < 19.0 and tasadof.randf() < 0.45:
+                                no = 6 # آجری نوساز
                         elif tasadof.randf() < 0.5:
                                 no = 1
                         ghesmatha[no].append({"p": paye, "c": range_sakhtema[tasadof.randi() % range_sakhtema.size()],
                                 "w": tasadof.randf_range(7, 15), "d": tasadof.randf_range(7, 13), "ht": ht})
                 i += qadam
-        var hamgi := [[0.95, 0.97, 1.0], [1.0, 0.96, 0.92], [1.0, 1.0, 1.0], [1.04, 1.0, 0.94], [1.0, 0.98, 0.95]]
-        for no in 5:
+        var hamgi := [[0.95, 0.97, 1.0], [1.0, 0.96, 0.92], [1.0, 1.0, 1.0], [1.04, 1.0, 0.94], [1.0, 0.98, 0.95], [1.02, 1.0, 0.96], [1.0, 0.95, 0.90]]
+        for no in 7:
                 if ghesmatha[no].size() == 0:
                         continue
                 var mm := MultiMesh.new()
@@ -924,7 +1021,7 @@ func _manzare_besaz() -> void:
                 mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
                 add_child(mmi)
         var mashalha: Array = []
-        for no in 5:
+        for no in 7:
                 mashalha += ghesmatha[no]
         _posh_bam(mashalha, tasadof)
 
@@ -1097,10 +1194,10 @@ func _derakht_cheragh(tasadof: RandomNumberGenerator) -> void:
                         var pp: Vector3 = NEMOONEHA[i] + NORMLHA[i] * kenar * (h + 1.35)
                         spotsP.append({"p": pp, "side": kenar, "i": i})
                         _khane_efe(pp.x, pp.z, 0.45)
-                # درخت‌ها
+                # درخت‌ها — نه ردیفِ پدربازیک؛ پراکنده و با تنوع قد
                 var derakhtan := int(round(float(tarjome["trees"]) * 3.0))
                 for t in derakhtan:
-                        if tasadof.randf() < 0.35:
+                        if tasadof.randf() < 0.58:
                                 continue
                         for kenar in [-1.0, 1.0]:
                                 var khamosh := h + 3.6 + tasadof.randf() * 2.8
@@ -1114,7 +1211,7 @@ func _derakht_cheragh(tasadof: RandomNumberGenerator) -> void:
         mmL.instance_count = spotsT.size()
         for k in spotsT.size():
                 var tp: Vector3 = spotsT[k]
-                var th := tasadof.randf_range(5.5, 8.0)   # چنار بلند ولیعصر
+                var th := tasadof.randf_range(4.6, 8.6)   # چنار ولیعصر — قدِ یکنواخت ممنوع
                 var tw := th * nesibe_tasvir
                 mmL.set_instance_transform(k, Transform3D(Basis.IDENTITY.scaled(Vector3(tw, th, tw)), Vector3(tp.x, 0.0, tp.z)))
                 var lc := Color(1.0, 1.0, 1.0)
@@ -1388,9 +1485,10 @@ func _bilon_bepar() -> void:
         var charchubi := StandardMaterial3D.new()
         charchubi.albedo_color = Color(0.24, 0.25, 0.28)
         charchubi.roughness = 0.7
-        # دو پوستر هنری هم بین تابلوهای فارسی — مثل بیلبوردهای ولیعصر
+        # دو پوستر هنری بین تابلوهای فارسی — دماوند و شهر؛ مثل بیلبوردهای ولیعصر
         var poster1 := _tex_bargozar("poster_tas")
         var poster2 := _tex_bargozar("poster_shahr")
+        var poster3 := _tex_bargozar("poster_damavand")
         var paye_m := CylinderMesh.new()
         paye_m.top_radius = 0.09
         paye_m.bottom_radius = 0.12
@@ -1424,9 +1522,11 @@ func _bilon_bepar() -> void:
                 qab.position = Vector3(0, 7.35, 0.05)
                 g.add_child(qab)
                 var panel_m := StandardMaterial3D.new()
-                var aks_shomare := shomare % 3
+                var aks_shomare := shomare % 4
                 if aks_shomare == 2 and poster1 != null:
                         panel_m.albedo_texture = poster1 if (shomare / 3) % 2 == 0 else (poster2 if poster2 != null else poster1)
+                elif aks_shomare == 3 and poster3 != null:
+                        panel_m.albedo_texture = poster3 # پوستر دماوند — سفرِ توپِ تود
                 else:
                         panel_m.albedo_texture = bafteha[shomare % bafteha.size()]
                 panel_m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
@@ -1443,7 +1543,7 @@ func _bilon_bepar() -> void:
                 g.add_child(pmi)
                 add_child(g)
                 shomare += 1
-                i += 62
+                i += 46 # بیلبورد متراکم‌تر — خیابان خالی، خیابان نیست
 
 # ═══════════════════ ماشین‌ساز — بدنه‌ی اسپرت کم‌ضلع ═══════════════════
 func _mate_rang(c: Color, metallic := 0.5) -> StandardMaterial3D:
@@ -2185,6 +2285,25 @@ func _hasteye_dorbin(dt: float) -> void:
                 dorbin.make_current()
         var jelo := Vector3(sin(semat), 0.0, cos(semat))
         var kenar := Vector3(jelo.z, 0.0, -jelo.x)
+        if halat == "intro":
+                # مدارِ سینمایی: دوربین آرام دور ماشین‌های خط شروع می‌چرخد و همه را نشان می‌دهد
+                var markaz_i := ja + jelo * 1.2
+                var hadaf_i := markaz_i + Vector3(cos(zavie_introzavie) * 8.8, 2.45, sin(zavie_introzavie) * 8.8)
+                if not dorbin_avalie:
+                        jaye_dorbin = hadaf_i
+                        negahe_dorbin = ja + Vector3.UP * 0.9
+                        dorbin_avalie = true
+                jaye_dorbin = hadaf_i
+                negahe_dorbin = negahe_dorbin.lerp(ja + jelo * 1.5 + Vector3.UP * 0.95, 1.0 - exp(-9.0 * dt))
+                dorbin.position = jaye_dorbin
+                dorbin.look_at(negahe_dorbin, Vector3.UP)
+                zavie_dorbin = lerpf(zavie_dorbin, 60.0, 1.0 - exp(-4.0 * dt))
+                dorbin.fov = zavie_dorbin
+                # غرش متغیر موتورها در مدار — صحنه زنده است
+                A.motor_bede(true, 0.20 + 0.10 * sin(zavie_introzavie * 2.2))
+                if javane_khat != null:
+                        javane_khat.set_shader_parameter("tavan", 0.0)
+                return
         var fasele := 5.2 + absf(v_jelo) * 0.045
         var erteza := 2.1 + absf(v_jelo) * 0.010
         # نیترو: دوربین می‌خوابد و کمی عقب‌تر — حالت هجومی
@@ -2263,11 +2382,13 @@ func _hasteye_raqibha(dt: float) -> void:
                         rishe.rotation.y = atan2(MAMASHA[i2].x, MAMASHA[i2].z)
                 for wh in rv["wheels"]:
                         wh.rotation.x -= float(rv["vf"]) * dt / 0.34
-        # جایگاه
-        jaye_payan = 1
-        for rv in raqibha:
-                if float(rv["s"]) > pishraft:
-                        jaye_payan += 1
+        # جایگاه — فقط در حال مسابقه؛ در «پایان» قفل می‌ماند تا رقیب‌های پشت سر
+        # در لحظه‌ی تعویق پنل، جای اول را ندزدند (باگ قدیمی سکوی قهرمانی)
+        if halat == "race":
+                jaye_payan = 1
+                for rv in raqibha:
+                        if float(rv["s"]) > pishraft:
+                                jaye_payan += 1
 
 # ═══════════════════ جریان مسابقه ═══════════════════
 func _payane_mosabeqe() -> void:
@@ -2284,6 +2405,9 @@ func _payane_mosabeqe() -> void:
         if arg_line.has("--win"):
                 jaye_payan = 1
         A.sfx_baz("win" if jaye_payan <= 3 else "fail")
+        # موتور تمام — جا برای سرود قهرمانی
+        A.motor_bede(false)
+        A.jigh_bede(false)
         var setareha := 3 if jaye_payan == 1 else (2 if jaye_payan == 2 else (1 if jaye_payan == 3 else 0))
         Koli.setare_bede(int(tarjome["id"]), setareha)
         var jaeze := int(tarjome["reward"]) + (int(tarjome["reward"]) / 2 if jaye_payan == 1 else 0)
@@ -2299,6 +2423,8 @@ func _panel_neshon() -> void:
         if ghahremani:
                 # قهرمانی تمام‌صفحه — هلیا روی سکوی اول با مدال طلا و پرچم ایران
                 _sahne_ghahremani()
+                # سرود کامل قهرمانی — نه چند بیت کوتاه؛ آهنگ واقعی جشن
+                A.ahang_vizhe()
         var p := PanelContainer.new()
         var sb := StyleBoxFlat.new()
         sb.bg_color = Color(0.10, 0.11, 0.15, 0.96)
@@ -2306,13 +2432,13 @@ func _panel_neshon() -> void:
         sb.border_width_bottom = 3
         sb.border_color = Color(0.95, 0.76, 0.25)
         p.add_theme_stylebox_override("panel", sb)
-        p.set_anchors_preset(Control.PRESET_CENTER)
+        # انکر پیش‌فرض (0,0) + جای‌گذاری بعد از add_child — انکرِ CENTER قبل از ورود به درخت،
+        # پنل را به (۱۰۰۰،۸۲۰) یعنی بیرونِ صفحه می‌فرستاد (باگ قدیمی پنهان‌بودن پنل پایان)
+        var ja_p := Vector2(640 - 280, 720 - 306) if ghahremani else Vector2(640 - 280, 360 - 230)
         if ghahremani:
                 p.custom_minimum_size = Vector2(560, 250)
-                p.position = Vector2(640 - 280, 720 - 260)
         else:
                 p.custom_minimum_size = Vector2(560, 460)
-                p.position = Vector2(640 - 280, 360 - 230)
         var vb := VBoxContainer.new()
         vb.add_theme_constant_override("separation", 14)
         p.add_child(vb)
@@ -2375,7 +2501,9 @@ func _panel_neshon() -> void:
                 get_tree().change_scene_to_file("res://scenes/menu.tscn"))
         hb.add_child(dokme_menu)
         $HUD.add_child(p)
-        print("[tizpa][race] PANEL OK")
+        # حالا که والد شناخته شد، جای پنل را داخل کادر بگذار
+        p.position = ja_p
+        print("[tizpa][race] PANEL OK rect=", p.get_global_rect())
 
 # صحنه‌ی قهرمانی: عکس تمام‌صفحه‌ی سکوی اول + مدال طلا + بند پرچم ایران + برفک طلایی
 func _sahne_ghahremani() -> void:
@@ -2394,37 +2522,40 @@ func _sahne_ghahremani() -> void:
                 tw.tween_property(ak, "modulate:a", 1.0, 0.6)
         # تیتر طلایی بالای کادر
         var f := load("res://assets/fonts/Lalezar-Regular.ttf")
+        # تیتر طلایی — فقط در نوار آسمانِ بالای عکس؛ صورتِ هلیا هرگز زیر متن نمی‌ماند
         var onvan := Label.new()
         onvan.text = "هلیا قهرمان شد!"
         onvan.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         if f != null:
                 onvan.add_theme_font_override("font", f)
-        onvan.add_theme_font_size_override("font_size", 82)
+        onvan.add_theme_font_size_override("font_size", 76)
         onvan.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
         onvan.add_theme_color_override("font_outline_color", Color(0.25, 0.12, 0.02))
-        onvan.add_theme_constant_override("outline_size", 16)
+        onvan.add_theme_constant_override("outline_size", 14)
         onvan.anchor_left = 0.0
         onvan.anchor_right = 1.0
-        onvan.anchor_top = 0.045
-        onvan.anchor_bottom = 0.165
+        onvan.anchor_top = 0.030
+        onvan.anchor_bottom = 0.135
         onvan.mouse_filter = Control.MOUSE_FILTER_IGNORE
         hud.add_child(onvan)
-        var zir := Label.new()
-        var f2 := load("res://assets/fonts/Vazirmatn-Bold.ttf")
-        zir.text = "مدال طلا روی گردنِ راننده‌ی تیز پا — جای اول!"
-        zir.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-        if f2 != null:
-                zir.add_theme_font_override("font", f2)
-        zir.add_theme_font_size_override("font_size", 28)
-        zir.add_theme_color_override("font_color", Color(1, 1, 1, 0.96))
-        zir.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-        zir.add_theme_constant_override("outline_size", 8)
-        zir.anchor_left = 0.0
-        zir.anchor_right = 1.0
-        zir.anchor_top = 0.165
-        zir.anchor_bottom = 0.22
-        zir.mouse_filter = Control.MOUSE_FILTER_IGNORE
-        hud.add_child(zir)
+        # نوار گرادیانِ تیره زیر تیتر تا متن روی نورافکن‌ها هم بخواند
+        var nivar := TextureRect.new()
+        var gt3 := GradientTexture2D.new()
+        var g3 := Gradient.new()
+        g3.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+        g3.colors = PackedColorArray([Color(0.02, 0.03, 0.07, 0.75), Color(0.02, 0.03, 0.07, 0.35), Color(0, 0, 0, 0.0)])
+        gt3.gradient = g3
+        gt3.fill_from = Vector2(0, 0)
+        gt3.fill_to = Vector2(0, 1)
+        nivar.texture = gt3
+        nivar.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+        nivar.stretch_mode = TextureRect.STRETCH_SCALE
+        nivar.anchor_left = 0.0
+        nivar.anchor_right = 1.0
+        nivar.anchor_top = 0.0
+        nivar.anchor_bottom = 0.20
+        nivar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        hud.add_child(nivar)
         # باران برفک طلایی — جشن قهرمانی
         var konfetti := CPUParticles2D.new()
         konfetti.amount = 90
@@ -2683,6 +2814,8 @@ func _zoonha() -> Dictionary:
 
 # ═══════════════════ ورودی ═══════════════════
 func _input(event: InputEvent) -> void:
+        # در اینتروی سینمایی، هر لمسی یعنی «شروع کن»
+        _introzavie_lamse(event)
         if event is InputEventScreenTouch:
                 var t := event as InputEventScreenTouch
                 if t.pressed:
@@ -2767,6 +2900,11 @@ func _process(dt: float) -> void:
                 return
         # روی گوشی‌های کند فریم‌های درشت فیزیک را می‌شکنند — سقف dt
         dt = minf(dt, 0.05)
+        if halat == "intro":
+                zamane_introzavie -= dt
+                zavie_introzavie += dt * 0.75
+                if zamane_introzavie <= 0.0:
+                        _shoroo_shomar()
         if halat == "count":
                 shomarvar -= dt
                 var n := int(ceil(shomarvar - 0.9))
@@ -2898,6 +3036,18 @@ func _tike_test(dt: float) -> void:
         if halat == "panel" and marhale_test < 9:
                 marhale_test = 9
                 print("[tizpa][race] PLAYTEST PASS")
+                # عکس صحنه‌ی قهرمانی — بلافاصله + بعد از فیداین؛ هر دو برای مقایسه
+                if arg_line.has("--win"):
+                        var aks0 := get_viewport().get_texture().get_image()
+                        if aks0 != null:
+                                aks0.save_png("/tmp/shot_panel_now.png")
+                        var hud := get_node_or_null("HUD")
+                        print("[tizpa][dbg] HUD children=", hud.get_child_count() if hud != null else -1, " halat=", halat, " pos=", jaye_payan, " vp=", get_viewport().get_visible_rect().size)
+                        get_tree().create_timer(1.4).timeout.connect(func():
+                                var aks := get_viewport().get_texture().get_image()
+                                if aks != null:
+                                        aks.save_png("/tmp/shot_podium.png")
+                                        print("[tizpa][race] SHOT podium -> /tmp/shot_podium.png", " halat=", halat))
                 # فقط چرخه‌ی تست کامل خودش برمی‌گردد؛ پلی‌تست ساده روی پنل می‌ماند (برای فیلم)
                 if arg_line.has("--autotest-full"):
                         Koli.set_meta("at_menu_return", true)
@@ -2906,7 +3056,8 @@ func _tike_test(dt: float) -> void:
 
 var aks_tamaam := {}
 func _tike_aks() -> void:
-        var neshanha := [[1.7, "countdown"], [4.6, "chase"], [5.8, "drift"], [7.9, "nitro"], [11.5, "city"]]
+        # زمان‌ها با اینتروی سینمایی تنظیم شده‌اند (۵ ثانیه مدار + شمارش)
+        var neshanha := [[2.2, "intro_orbit"], [4.4, "intro_grid"], [8.2, "countdown"], [10.6, "chase"], [12.4, "drift"], [15.0, "nitro"], [19.0, "city"]]
         for m in neshanha:
                 var tt: float = m[0]
                 var nm: String = m[1]
@@ -2916,6 +3067,6 @@ func _tike_aks() -> void:
                         var masir := "/tmp/shot_" + nm + ".png"
                         aks.save_png(masir)
                         print("[tizpa][race] SHOT ", nm, " -> ", masir)
-        if t_test > 13.0:
+        if t_test > 20.5:
                 print("[tizpa][race] SHOTS DONE")
                 get_tree().quit()

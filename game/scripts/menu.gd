@@ -342,8 +342,8 @@ func _hero_besaz() -> void:
         ghahreman.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
         ghahreman.anchor_left = 0.0
         ghahreman.anchor_right = 0.62
-        ghahreman.anchor_top = 0.24
-        ghahreman.anchor_bottom = 0.99
+        ghahreman.anchor_top = 0.20
+        ghahreman.anchor_bottom = 0.995
         ghahreman.mouse_filter = Control.MOUSE_FILTER_IGNORE
         add_child(ghahreman)
         mashinaye_shahr.append(ghahreman)

@@ -4,12 +4,17 @@ var sfx := {}
 var pakhsh_ahang: AudioStreamPlayer
 var pakhsh_motor: AudioStreamPlayer
 var pakhsh_jigh: AudioStreamPlayer
+var pakhsh_vizhe: AudioStreamPlayer
 
-func _ready() -> void:
+func _sfx_bekhon() -> void:
         for n in ["horn", "coin", "jump", "boost", "crash", "win", "fail", "clank", "nitro", "lap", "beep"]:
                 var masir := "res://assets/audio/%s.wav" % n
                 if ResourceLoader.exists(masir):
                         sfx[n] = load(masir)
+
+func _ready() -> void:
+        # سانتی‌ها بعد از اولین فریم خوانده می‌شوند — بوت چندصدم سریع‌تر، بدون لکنت
+        call_deferred("_sfx_bekhon")
         pakhsh_ahang = AudioStreamPlayer.new()
         var masire_ahang := "res://assets/audio/music_loop.ogg"
         if ResourceLoader.exists(masire_ahang):
@@ -20,9 +25,15 @@ func _ready() -> void:
         pakhsh_ahang.finished.connect(func(): pakhsh_ahang.play())
         add_child(pakhsh_ahang)
         # آهنگ بلافاصله از لحظه‌ی بوت شروع می‌شود — حتی قبل از منو
-        # (اثر انگشت شنیداری v0.7: اگر این آهنگ شنیده شد یعنی بیلد درست نصب است)
         if pakhsh_ahang.stream != null:
                 pakhsh_ahang.play()
+        # پخش‌کننده‌ی سرود قهرمانی — سکوی نفر اول بدون آهنگِ کامل، جشن نیست
+        pakhsh_vizhe = AudioStreamPlayer.new()
+        var masire_vizhe := "res://assets/audio/ahang_piroozi.ogg"
+        if ResourceLoader.exists(masire_vizhe):
+                pakhsh_vizhe.stream = load(masire_vizhe)
+        pakhsh_vizhe.volume_db = -5.0
+        add_child(pakhsh_vizhe)
         pakhsh_motor = AudioStreamPlayer.new()
         pakhsh_motor.stream = load("res://assets/audio/engine.wav")
         # لوپ بی‌درز موتور — اگر یک‌بار مکث شنیده شود حس رباتیک می‌دهد
@@ -55,11 +66,22 @@ func _ready() -> void:
                 add_child(pakhsh_jigh)
 
 func ahang_baz() -> void:
+        # سرود قهرمانی اگر هنوز پخش می‌شود، تمامش کن — منو آهنگِ خودش را می‌خواهد
+        if pakhsh_vizhe != null and pakhsh_vizhe.playing:
+                pakhsh_vizhe.stop()
         if not pakhsh_ahang.playing:
                 pakhsh_ahang.play()
 
 func ahang_qat() -> void:
         pakhsh_ahang.stop()
+        if pakhsh_vizhe != null:
+                pakhsh_vizhe.stop()
+
+func ahang_vizhe() -> void:
+        # سرود کامل قهرمانی (~۵۰ ثانیه) — جای چند بیت کوتاه
+        pakhsh_ahang.stop()
+        if pakhsh_vizhe != null and pakhsh_vizhe.stream != null:
+                pakhsh_vizhe.play()
 
 func sfx_baz(name: String) -> void:
         if sfx.has(name):

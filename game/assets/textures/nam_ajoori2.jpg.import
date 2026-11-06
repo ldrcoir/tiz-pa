@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cnjumj1d4lwpv"
-path="res://.godot/imported/car_base.webp-e143d3fe4af6c4c6f7dc0b6e755ad689.ctex"
+uid="uid://cfte1gmq1l8a0"
+path="res://.godot/imported/nam_ajoori2.jpg-791834ac01e43b0e06b0bdfd55461d3b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/car_base.webp"
-dest_files=["res://.godot/imported/car_base.webp-e143d3fe4af6c4c6f7dc0b6e755ad689.ctex"]
+source_file="res://assets/textures/nam_ajoori2.jpg"
+dest_files=["res://.godot/imported/nam_ajoori2.jpg-791834ac01e43b0e06b0bdfd55461d3b.ctex"]
 
 [params]
 
@@ -36,5 +36,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=1024
 detect_3d/compress_to=1

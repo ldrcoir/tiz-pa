@@ -72,7 +72,8 @@ func _bargard_be_menu() -> void:
         if nemone is Control:
                 nemone.set("layout_direction", Control.LAYOUT_DIRECTION_LTR)
         get_tree().root.add_child.call_deferred(nemone)
-        await get_tree().create_timer(0.9).timeout
+        # فقط ۰٫۴ ثانیه صبر — تا منو اولین فریمش را بکشد؛ نه یک ثانیه‌ی مرده
+        await get_tree().create_timer(0.4).timeout
         if not is_instance_valid(self):
                 return
         # چک سلامت: پنل خانه‌ی منو باید ساخته شده باشد
