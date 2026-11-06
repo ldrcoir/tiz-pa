@@ -551,7 +551,6 @@ static func wobble(ferman_dasti: Control) -> void:
 
 class Bubble extends Control:
         var nshan: Label
-        var maghz: CarBrain
         var _t := 0.0
         var _majmoo := 0.0
         var _negah := 0.0

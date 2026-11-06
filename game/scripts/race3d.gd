@@ -739,10 +739,13 @@ func _bafte_asfalt() -> ImageTexture:
         t.seed = 41
         for y in 128:
                 for x in 128:
-                        var g := 0.88 + t.randf_range(-0.08, 0.08)
-                        if t.randf() < 0.04:
-                                g -= 0.16 # دانه‌های درشت آسفالت
-                        aks.set_pixel(x, y, Color(g, g, g * 1.015))
+                        # آسفالت واقعی تیره است — خاکستری ۰.۱۷ با دانه‌های روشن و تیره
+                        var g := 0.155 + t.randf_range(-0.025, 0.035)
+                        if t.randf() < 0.05:
+                                g += 0.06 # دانه‌های روشن شن
+                        if t.randf() < 0.03:
+                                g -= 0.05 # دانه‌های تیره‌تر
+                        aks.set_pixel(x, y, Color(g, g, g * 1.02))
         return ImageTexture.create_from_image(aks)
 
 func _bafte_zamin() -> ImageTexture:
@@ -762,8 +765,8 @@ func _bafte_zamin() -> ImageTexture:
                                 var dx := minf(absf(u - gb[0]), 1.0 - absf(u - gb[0]))
                                 var dy := minf(absf(v - gb[1]), 1.0 - absf(v - gb[1]))
                                 m += gb[3] * exp(-(dx * dx + dy * dy) / (gb[2] * gb[2]))
-                        var g := clampf(0.94 + m + t.randf_range(-0.05, 0.05), 0.0, 1.0)
-                        aks.set_pixel(x, y, Color(g, g, g))
+                        var g := clampf(0.52 + m + t.randf_range(-0.05, 0.05), 0.0, 1.0)
+                        aks.set_pixel(x, y, Color(g * 1.06, g * 0.98, g * 0.84))
         return ImageTexture.create_from_image(aks)
 
 # برج شیشه‌ای مدرن — شبکه‌ی مولیون فلزی و شیشه‌های آبی با انعکاس آسمان
@@ -1195,9 +1198,9 @@ func _derakht_cheragh(tasadof: RandomNumberGenerator) -> void:
                         spotsP.append({"p": pp, "side": kenar, "i": i})
                         _khane_efe(pp.x, pp.z, 0.45)
                 # درخت‌ها — نه ردیفِ پدربازیک؛ پراکنده و با تنوع قد
-                var derakhtan := int(round(float(tarjome["trees"]) * 3.0))
+                var derakhtan := int(round(float(tarjome["trees"]) * 2.2))
                 for t in derakhtan:
-                        if tasadof.randf() < 0.58:
+                        if tasadof.randf() < 0.62:
                                 continue
                         for kenar in [-1.0, 1.0]:
                                 var khamosh := h + 3.6 + tasadof.randf() * 2.8
@@ -1543,7 +1546,7 @@ func _bilon_bepar() -> void:
                 g.add_child(pmi)
                 add_child(g)
                 shomare += 1
-                i += 46 # بیلبورد متراکم‌تر — خیابان خالی، خیابان نیست
+                i += 30 # بیلبورد متراکم‌تر — خیابان خالی، خیابان نیست
 
 # ═══════════════════ ماشین‌ساز — بدنه‌ی اسپرت کم‌ضلع ═══════════════════
 func _mate_rang(c: Color, metallic := 0.5) -> StandardMaterial3D:
@@ -1726,6 +1729,26 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         _qute(rishe, Vector3(1.34, 0.05, 0.30), Vector3(0, 0.905, -1.99), laki)
         _qute(rishe, Vector3(0.05, 0.09, 0.22), Vector3(0.58, 0.875, -2.01), tir)
         _qute(rishe, Vector3(0.05, 0.09, 0.22), Vector3(-0.58, 0.875, -2.01), tir)
+        # ── بال GT بزرگ روی پایه‌ها — از پشت‌دوربین، امضای «ماشین مسابقه» همین است ──
+        var karbon := _mate_tir(Color(0.055, 0.055, 0.062), 0.32)
+        _qute(rishe, Vector3(0.07, 0.34, 0.07), Vector3(0.52, 1.06, -1.86), tir)
+        _qute(rishe, Vector3(0.07, 0.34, 0.07), Vector3(-0.52, 1.06, -1.86), tir)
+        _qute(rishe, Vector3(1.66, 0.055, 0.40), Vector3(0, 1.235, -1.92), karbon, Vector3(-8, 0, 0))
+        _qute(rishe, Vector3(0.045, 0.20, 0.42), Vector3(0.82, 1.19, -1.92), karbon)
+        _qute(rishe, Vector3(0.045, 0.20, 0.42), Vector3(-0.82, 1.19, -1.92), karbon)
+        # ── پره‌ی گلگیر برجسته روی چهار چرخ — بدنه از پهلو جثه می‌گیرد ──
+        var gooshe_golgiro := SphereMesh.new()
+        gooshe_golgiro.radius = 0.46
+        gooshe_golgiro.height = 0.92
+        gooshe_golgiro.radial_segments = 14
+        gooshe_golgiro.rings = 7
+        for gl in [Vector3(0.74, 0.62, 1.45), Vector3(-0.74, 0.62, 1.45), Vector3(0.76, 0.62, -1.45), Vector3(-0.76, 0.62, -1.45)]:
+                var ggi := MeshInstance3D.new()
+                ggi.mesh = gooshe_golgiro
+                ggi.scale = Vector3(0.42, 0.62, 1.06)
+                ggi.position = gl
+                ggi.material_override = pm
+                rishe.add_child(ggi)
         # ── دامن جانبی + آینه‌ها ──
         _qute(rishe, Vector3(0.05, 0.09, 1.90), Vector3(0.875, 0.235, 0), tir)
         _qute(rishe, Vector3(0.05, 0.09, 1.90), Vector3(-0.875, 0.235, 0), tir)
@@ -1742,6 +1765,11 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         _qute(rishe, Vector3(0.09, 0.012, 0.92), Vector3(-0.16, 1.282, -0.08), ragh)
         _qute(rishe, Vector3(0.09, 0.012, 0.62), Vector3(0.15, 0.895, -1.74), ragh, Vector3(-7, 0, 0))
         _qute(rishe, Vector3(0.09, 0.012, 0.62), Vector3(-0.15, 0.895, -1.74), ragh, Vector3(-7, 0, 0))
+        # ── راه‌راه کاپوت — از پشت‌دوربین، امضای دو رنگِ ماشینِ هلیا ──
+        _qute(rishe, Vector3(0.10, 0.012, 1.06), Vector3(0.15, 0.752, 1.34), ragh, Vector3(-4.5, 0, 0))
+        _qute(rishe, Vector3(0.10, 0.012, 1.06), Vector3(-0.15, 0.752, 1.34), ragh, Vector3(-4.5, 0, 0))
+        _qute(rishe, Vector3(0.10, 0.012, 0.80), Vector3(0.15, 0.70, 2.02), ragh, Vector3(-6, 0, 0))
+        _qute(rishe, Vector3(0.10, 0.012, 0.80), Vector3(-0.15, 0.70, 2.02), ragh, Vector3(-6, 0, 0))
 
         # ── راننده — هلیا با مقنعه، از شیشه‌ی دودی پیداست ──
         if with_driver:
@@ -1776,11 +1804,11 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
         var wmat2 := _mate_tir(Color(0.065, 0.065, 0.07), 0.92)
         lastik_tori.material = wmat2
         var ring := CylinderMesh.new()
-        ring.top_radius = 0.175
-        ring.bottom_radius = 0.175
+        ring.top_radius = 0.195
+        ring.bottom_radius = 0.195
         ring.height = 0.15
-        ring.radial_segments = 16
-        ring.material = _mate_tir(Color(0.62, 0.64, 0.68), 0.22)
+        ring.radial_segments = 20
+        ring.material = _mate_tir(Color(0.68, 0.70, 0.74), 0.18)
         var hub := CylinderMesh.new()
         hub.top_radius = 0.055
         hub.bottom_radius = 0.055
@@ -1822,15 +1850,27 @@ func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictio
                 ring2.mesh = ring
                 ring2.rotation_degrees = Vector3(0, 0, 90)
                 wh.add_child(ring2)
-                # پنج پره — هر پره یک جعبه‌ی باریک چرخیده دور محور
-                for p in 5:
-                        var gooshe := p * TAU / 5.0
+                # شش پره‌ی براق + حلقه‌ی رنگی لبه‌ی رینگ — از دور هم چرخ دیده می‌شود
+                var halge_rang := _mate_tir(Color(0.85, 0.68, 0.28), 0.3) if rang.v < 0.5 else _mate_tir(Color(0.12, 0.35, 0.75), 0.3)
+                var halqe_rin := MeshInstance3D.new()
+                var th := TorusMesh.new()
+                th.inner_radius = 0.185
+                th.outer_radius = 0.215
+                th.rings = 18
+                th.ring_segments = 6
+                th.material = halge_rang
+                halqe_rin.mesh = th
+                halqe_rin.rotation_degrees = Vector3(0, 0, 90)
+                halqe_rin.position = Vector3(signf(wp.x) * 0.075, 0, 0)
+                wh.add_child(halqe_rin)
+                for p in 6:
+                        var gooshe := p * TAU / 6.0
                         var pare := MeshInstance3D.new()
                         var bm2 := BoxMesh.new()
-                        bm2.size = Vector3(0.16, 0.135, 0.042)
-                        bm2.material = _mate_tir(Color(0.56, 0.58, 0.62), 0.28)
+                        bm2.size = Vector3(0.16, 0.14, 0.042)
+                        bm2.material = _mate_tir(Color(0.62, 0.64, 0.68), 0.24)
                         pare.mesh = bm2
-                        pare.position = Vector3(0, cos(gooshe) * 0.10, sin(gooshe) * 0.10)
+                        pare.position = Vector3(0, cos(gooshe) * 0.105, sin(gooshe) * 0.105)
                         pare.rotation.x = -gooshe
                         wh.add_child(pare)
                 var disk2 := MeshInstance3D.new()
@@ -2304,12 +2344,13 @@ func _hasteye_dorbin(dt: float) -> void:
                 if javane_khat != null:
                         javane_khat.set_shader_parameter("tavan", 0.0)
                 return
-        var fasele := 5.2 + absf(v_jelo) * 0.045
-        var erteza := 2.1 + absf(v_jelo) * 0.010
+        # دوربین عقب‌تر از قبل اما نه به‌اندازه‌ی نقص — کل ماشین با حاشیه در کادر است
+        var fasele := 6.0 + absf(v_jelo) * 0.048
+        var erteza := 2.5 + absf(v_jelo) * 0.012
         # نیترو: دوربین می‌خوابد و کمی عقب‌تر — حالت هجومی
         if nitro_rushan and nitro > 0.0:
-                fasele += 0.35
-                erteza -= 0.30
+                fasele += 0.5
+                erteza -= 0.35
         var hadaf := ja - jelo * fasele + Vector3.UP * erteza
         if larze > 0.0:
                 larze = maxf(0.0, larze - dt * 1.6)
@@ -2646,18 +2687,18 @@ void fragment() {
         var fd: FontFile = load("res://assets/fonts/Lalezar-Regular.ttf")
         if fd == null:
                 fd = f
-        # گیج سرعت (رسم سفارشی)
+        # گیج سرعت (رسم سفارشی) — بالا-راست، دور از دکمه‌های لمسی پایین صفحه
         sanje_hud = Control.new()
-        sanje_hud.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-        sanje_hud.position = Vector2(-300, -300)
-        sanje_hud.size = Vector2(260, 260)
+        sanje_hud.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+        sanje_hud.position = Vector2(-286, 52)
+        sanje_hud.size = Vector2(250, 250)
         sanje_hud.draw.connect(_sanje_kesh.bind(sanje_hud))
         hud.add_child(sanje_hud)
-        # نوار نیترو
+        # نوار نیترو — عمودی کنار گیج
         mostatil_nitro = ColorRect.new()
         mostatil_nitro.color = Color(0.1, 0.1, 0.14, 0.75)
-        mostatil_nitro.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-        mostatil_nitro.position = Vector2(-326, -224)
+        mostatil_nitro.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+        mostatil_nitro.position = Vector2(-318, 90)
         mostatil_nitro.size = Vector2(20, 180)
         hud.add_child(mostatil_nitro)
         sharge_nitro = ColorRect.new()
@@ -2666,31 +2707,37 @@ void fragment() {
         sharge_nitro.position = Vector2(2, 0)
         sharge_nitro.size = Vector2(16, 180)
         mostatil_nitro.add_child(sharge_nitro)
-        # جایگاه
+        # جایگاه — بالا-چپ، زیر هم استک می‌شوند (خوانا در RTL)
         matne_ja = Label.new()
         matne_ja.set_anchors_preset(Control.PRESET_TOP_LEFT)
-        matne_ja.position = Vector2(24, 18)
+        matne_ja.position = Vector2(24, 12)
         matne_ja.add_theme_font_size_override("font_size", 64)
         matne_ja.add_theme_font_override("font", fd)
         matne_ja.add_theme_color_override("font_color", Color(0.95, 0.76, 0.25))
+        matne_ja.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 0.9))
+        matne_ja.add_theme_constant_override("outline_size", 10)
         hud.add_child(matne_ja)
-        # دور + زمان
+        # دور + زمان — زیر جایگاه در همان ستون
         matne_dour = Label.new()
-        matne_dour.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-        matne_dour.position = Vector2(-260, 18)
-        matne_dour.size = Vector2(236, 40)
-        matne_dour.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+        matne_dour.set_anchors_preset(Control.PRESET_TOP_LEFT)
+        matne_dour.position = Vector2(24, 88)
+        matne_dour.size = Vector2(300, 40)
+        matne_dour.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
         matne_dour.add_theme_font_size_override("font_size", 30)
         matne_dour.add_theme_font_override("font", f)
+        matne_dour.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 0.9))
+        matne_dour.add_theme_constant_override("outline_size", 7)
         hud.add_child(matne_dour)
         matne_zaman = Label.new()
-        matne_zaman.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-        matne_zaman.position = Vector2(-260, 62)
-        matne_zaman.size = Vector2(236, 34)
-        matne_zaman.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+        matne_zaman.set_anchors_preset(Control.PRESET_TOP_LEFT)
+        matne_zaman.position = Vector2(24, 130)
+        matne_zaman.size = Vector2(300, 34)
+        matne_zaman.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
         matne_zaman.add_theme_font_size_override("font_size", 24)
         matne_zaman.add_theme_font_override("font", f)
         matne_zaman.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
+        matne_zaman.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 0.9))
+        matne_zaman.add_theme_constant_override("outline_size", 6)
         hud.add_child(matne_zaman)
         # مرکز: شمارش/پیام
         matne_vasat = Label.new()
@@ -2802,14 +2849,24 @@ func _dokmehaye_lamsi_besaz() -> void:
         hud.add_child(eshare_gaz)
 
 # جای دکمه‌ها — هم رسم و هم برخورد لمس از همین یک منبع می‌خوانند
+# روی هر گوشی‌ای با هر نسبت تصویر، دکمه‌ها داخل کادر می‌مانند — اندازه‌ها از ابعاد واقعی صفحه می‌آیند
 func _zoonha() -> Dictionary:
+        var vp: Vector2 = get_viewport().get_visible_rect().size
+        var W := maxf(vp.x, 640.0)
+        var H := maxf(vp.y, 360.0)
+        var r_asli := clampf(H * 0.098, 44.0, 78.0)
+        var labe := clampf(H * 0.055, 22.0, 46.0)          # فاصله از لبه‌ی پایین
+        var kenar := clampf(W * 0.045, 60.0, 200.0)        # فاصله از لبه‌های چپ/راست
+        var y_paeen := H - labe - r_asli
+        var x_chap := kenar + r_asli
+        var x_gaz := W - kenar - r_asli
         return {
-                "gaz": {"pos": Vector2(640 - 112, 720 - 122), "r": 66.0, "col": Color(0.15, 0.75, 0.25, 0.55), "label": "گاز"},
-                "brake": {"pos": Vector2(640 - 252, 720 - 72), "r": 48.0, "col": Color(0.2, 0.2, 0.25, 0.5), "label": "ترمز"},
-                "nitro": {"pos": Vector2(640 - 258, 720 - 198), "r": 54.0, "col": Color(0.2, 0.5, 0.95, 0.55), "label": "نیترو"},
-                "hb": {"pos": Vector2(640 - 112, 720 - 262), "r": 50.0, "col": Color(0.9, 0.3, 0.2, 0.5), "label": "دستی"},
-                "chap": {"pos": Vector2(96, 720 - 118), "r": 56.0, "col": Color(0.35, 0.45, 0.6, 0.55), "label": ""},
-                "rast": {"pos": Vector2(248, 720 - 118), "r": 56.0, "col": Color(0.35, 0.45, 0.6, 0.55), "label": ""},
+                "gaz": {"pos": Vector2(x_gaz, y_paeen), "r": r_asli * 1.12, "col": Color(0.15, 0.75, 0.25, 0.60), "label": "گاز"},
+                "brake": {"pos": Vector2(x_gaz - r_asli * 2.15, H - labe - r_asli * 0.55), "r": r_asli * 0.78, "col": Color(0.2, 0.2, 0.25, 0.55), "label": "ترمز"},
+                "nitro": {"pos": Vector2(x_gaz - r_asli * 1.95, y_paeen - r_asli * 1.9), "r": r_asli * 0.92, "col": Color(0.2, 0.5, 0.95, 0.60), "label": "نیترو"},
+                "hb": {"pos": Vector2(x_gaz, y_paeen - r_asli * 2.45), "r": r_asli * 0.85, "col": Color(0.9, 0.3, 0.2, 0.55), "label": "دستی"},
+                "chap": {"pos": Vector2(x_chap, y_paeen), "r": r_asli * 1.05, "col": Color(0.35, 0.45, 0.6, 0.60), "label": ""},
+                "rast": {"pos": Vector2(x_chap + r_asli * 2.35, y_paeen), "r": r_asli * 1.05, "col": Color(0.35, 0.45, 0.6, 0.60), "label": ""},
         }
 
 # ═══════════════════ ورودی ═══════════════════
