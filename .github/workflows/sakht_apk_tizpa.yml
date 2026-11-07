@@ -1,0 +1,71 @@
+name: sakht_apk_tizpa
+# ساختِ خودکارِ APK تیزپا روی سرورِ گیت‌هاب
+# نتیجه: تبِ Actions → آخرین اجرا → Artifact با نامِ TizPa_APK
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "ema/tizpa/**"
+      - ".github/workflows/sakht_apk_tizpa.yml"
+  workflow_dispatch:
+    # دکمهٔ دستی: تبِ Actions → sakht_apk_tizpa → Run workflow
+
+jobs:
+  sakht_apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: daryaft_e_code
+        uses: actions/checkout@v4
+
+      - name: javaye_17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: nasb_e_android_sdk
+        uses: android-actions/setup-android@v3
+
+      - name: kamel_kardan_e_sdk
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34" > /dev/null
+
+      - name: sakht_e_kelid_e_emza_debug
+        # همان کلیدِ اشکال‌زدایی که تنظیماتِ خروجی انتظارش را دارد
+        run: |
+          sudo mkdir -p /home/z/.android
+          keytool -genkeypair -v \
+            -keystore /home/z/.android/debug.keystore \
+            -storepass android -alias androiddebugkey -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: nasb_e_godot_4_7_2_va_ghalab_haye_khorooji
+        run: |
+          set -e
+          curl -sL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot_bin
+          sudo mv /tmp/godot_bin/Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+          curl -sL -o /tmp/ghalab.tpz "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz"
+          mkdir -p /tmp/ghalab_out "$HOME/.local/share/godot/export_templates"
+          unzip -q /tmp/ghalab.tpz -d /tmp/ghalab_out
+          mv /tmp/ghalab_out/templates "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+
+      - name: amade_sazi_e_tarh
+        run: godot --headless --path ema/tizpa --import
+
+      - name: sakht_e_apk
+        run: |
+          godot --headless --path ema/tizpa --export-debug "Android" build/tizpa_v0.2.apk
+          ls -la ema/tizpa/build/
+
+      - name: enteshar_e_apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: TizPa_APK
+          path: ema/tizpa/build/*.apk
+          retention-days: 90
+          if-no-files-found: error
