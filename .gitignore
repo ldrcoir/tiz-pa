@@ -1,6 +1,6 @@
 # godot
-game/.godot/
-game/android/build/
+ema/tizpa/.godot/
+ema/tizpa/android/build/
 
 # بیلد و خروجی‌ها — فقط ریشه، نه game/scripts
 /build/
