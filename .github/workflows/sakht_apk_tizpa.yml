@@ -63,6 +63,7 @@ jobs:
 
       - name: sakht_e_apk
         run: |
+          mkdir -p ema/tizpa/build
           godot --headless --path ema/tizpa --export-debug "Android" build/tizpa_v0.2.apk
           ls -la ema/tizpa/build/
 
