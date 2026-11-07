@@ -42,18 +42,19 @@ func _ready() -> void:
         print("[tizpa2d][3d] LOADED ", masir_glb, " nm=", esm_khoruji)
 
 # مدل را هم‌اندازه می‌کند: بلندترین بعدش ۳ متر، پایش روی زمین، وسط صحنه
+# نکته: لامبادا در گودوت متغیر را کپی می‌کند — پس با دیکشنری (رفرنسی) کار می‌کنیم
 func _hamvar_saz(gereh: Node3D) -> void:
-        var mohit := AABB(Vector3.ZERO, Vector3.ONE)
-        var aval := true
+        var juzi := {"mohit": AABB(Vector3.ZERO, Vector3.ONE), "aval": true}
         var kar := func(n: Node) -> void:
                 if n is MeshInstance3D and n.mesh != null:
-                        var a := n.global_transform * n.mesh.get_aabb()
-                        if aval:
-                                mohit = a
-                                aval = false
+                        var a: AABB = n.global_transform * n.mesh.get_aabb()
+                        if juzi["aval"]:
+                                juzi["mohit"] = a
+                                juzi["aval"] = false
                         else:
-                                mohit = mohit.merge(a)
+                                juzi["mohit"] = (juzi["mohit"] as AABB).merge(a)
         _dor_zel(gereh, kar)
+        var mohit: AABB = juzi["mohit"]
         var andaze := mohit.size
         var bozorgtar := maxf(andaze.x, maxf(andaze.y, andaze.z))
         if bozorgtar <= 0.0:
@@ -62,6 +63,7 @@ func _hamvar_saz(gereh: Node3D) -> void:
         var markaz := mohit.get_center()
         gereh.scale = Vector3(v, v, v)
         gereh.position = Vector3(-markaz.x * v, -mohit.position.y * v, -markaz.z * v)
+        print("[tizpa2d][3d] AABB=", mohit.size, " maghsas=", v)
 
 func _dor_zel(gereh: Node, kar: Callable) -> void:
         kar.call(gereh)

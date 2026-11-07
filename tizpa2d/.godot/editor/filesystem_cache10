@@ -1,7 +1,7 @@
 78098b89c88a74ebe8c20117b8754620
 ::res://::1794009689
-::res://assets/::1794008789
-::res://assets/art/::1794009720
+::res://assets/::1794010376
+::res://assets/art/::1794009777
 aseman.png::CompressedTexture2D::6322347939713293413::1794009761::1794009777::1::::<><><>0<>0<>e37586a0d08d5ddefb9e2f4bc180b1b0<>res://.godot/imported/aseman.png-73d225cfdf31ce7378eeebeb5cad1aa6.ctex::
 derakht.png::CompressedTexture2D::883467850723402900::1794009071::1794009692::1::::<><><>0<>0<>6653505093d83f166a94b807bdbc2684<>res://.godot/imported/derakht.png-75066f3b0ce68182ad974c8ef92caf38.ctex::
 khat_shahr.png::CompressedTexture2D::4668589931579883819::1794009071::1794009692::1::::<><><>0<>0<>39f49f01005c30e2521ef692dc2a3620<>res://.godot/imported/khat_shahr.png-ae24e64b73ef043cb510313dda702fff.ctex::
@@ -10,6 +10,8 @@ varagheli.png::CompressedTexture2D::6250164753782390146::1794009072::1794009693:
 ::res://assets/fonts/::1794009691
 Lalezar-Regular.ttf::FontFile::725238246151885281::1794008789::1794009691::1::::<><><>0<>0<>15456eb49fb2748b738696c0925a045d<>res://.godot/imported/Lalezar-Regular.ttf-dc1f71c365085f122f1c0ff510f03229.fontdata::
 Vazirmatn-Bold.ttf::FontFile::2444718298538168364::1794008789::1794009691::1::::<><><>0<>0<>baa9b4a4a0e4ea998960dfcb8be28abe<>res://.godot/imported/Vazirmatn-Bold.ttf-df471ca3f5792a520d014e2e5128e918.fontdata::
+::res://assets/models/::1794010379
+tizpa_mashin.glb::PackedScene::4038139168639299137::1794010376::1794010379::1::::<><><>0<>0<>c5f31759749e8cd45a348af21ac6a2e7<>res://.godot/imported/tizpa_mashin.glb-6ad1437bc3a52dee16c3f9653ba2ec2e.scn::
 ::res://assets/sprites/::1794009693
 car_boghi_yellow.webp::CompressedTexture2D::3686697461002635493::1794009620::1794009693::1::::<><><>0<>0<>c65e44f96d835d11c3f7563bcd648c9e<>res://.godot/imported/car_boghi_yellow.webp-e9c826cbb7c3b77b094e9107c41dd718.ctex::
 car_pejo.webp::CompressedTexture2D::2849533956979342875::1794009620::1794009693::1::::<><><>0<>0<>296511be3bcd04102b1ead9781af3ce6<>res://.godot/imported/car_pejo.webp-3559e82cbdab49cbbfd1748b170e172f.ctex::
@@ -18,10 +20,10 @@ car_samand.webp::CompressedTexture2D::7200527980878655373::1794009620::179400969
 bazi.tscn::PackedScene::-1::1794009201::0::1::::<><><>0<>0<><>::res://scripts/bazi.gd
 menu.tscn::PackedScene::-1::1794009201::0::1::::<><><>0<>0<><>::res://scripts/menu.gd
 namayesh_3d.tscn::PackedScene::-1::1794009201::0::1::::<><><>0<>0<><>::res://scripts/namayesh_3d.gd
-::res://scripts/::1794009641
-bazi.gd::GDScript::104004485117183923::1794009594::0::1::::<>Node2D<><>0<>0<><>::
-hud.gd::GDScript::250050493661498780::1794009593::0::1::::<>Node2D<><>0<>0<><>::
+::res://scripts/::1794010308
+bazi.gd::GDScript::104004485117183923::1794010220::0::1::::<>Node2D<><>0<>0<><>::
+hud.gd::GDScript::250050493661498780::1794010147::0::1::::<>Node2D<><>0<>0<><>::
 jadde.gd::GDScript::372099981893789479::1794009350::0::1::::<>Node2D<><>0<>0<><>::
-jahan.gd::GDScript::4918573120821166537::1794009350::0::1::::<>Node2D<><>0<>0<><>::
-menu.gd::GDScript::3328107299208271900::1794009350::0::1::::<>Node2D<><>0<>0<><>::
-namayesh_3d.gd::GDScript::5500929499189110533::1794009625::0::1::::<>Node3D<><>0<>0<><>::
+jahan.gd::GDScript::4918573120821166537::1794009821::0::1::::<>Node2D<><>0<>0<><>::
+menu.gd::GDScript::3328107299208271900::1794010308::0::1::::<>Node2D<><>0<>0<><>::
+namayesh_3d.gd::GDScript::5500929499189110533::1794010591::0::1::::<>Node3D<><>0<>0<><>::
