@@ -1,0 +1,350 @@
+╔══════════════════════════════════════════════════════════════════╗
+║   تیزپا — پرامپت‌های سنگینِ سه‌بعدی برای کمکِ بیرونی              ║
+║   هدف: اگر هوش مصنوعی یا هنرمندِ بیرون، مدل بهتری ساخت،          ║
+║   جایگزین مدل‌های فعلی کنیم — مقایسهٔ منصفانه                     ║
+╚══════════════════════════════════════════════════════════════════╝
+
+راهنمای استفاده — یک بار بخوان، همه‌جا کاربرد دارد:
+──────────────────────────────────────────────────────────────────
+· این پرامپت‌ها برای سرویس‌های «متن‌به‌سه‌بعدی» و «عکس‌به‌سه‌بعدی» نوشته
+  شده‌اند: Meshy.ai ، Tripo3D ، Rodin (Hyper3D) ، Luma Genie ، 3DAiStudio.
+· پرامپت انگلیسی را مستقیم کپی کن. بخش «تنظیمات» را همان‌جا که سرویس
+  می‌پرسد اعمال کن (Art Style / Topology / Symmetry / Polycount / Texture).
+· برای سرویس‌های «عکس‌به‌سه‌بعدی»: اول با همین پرامپت در Midjourney/DALL-E
+  یک رندر تمیز بساز، بعد تصویر را بده به Meshy/Tripo Image-to-3D.
+  تصاویر مرجعِ موجودِ خودمان: ema/tizpa/assets/sprites/car_boghi_yellow.webp
+· فرمت تحویل: glTF/GLB ، تکسچر PBR 2K ، جهت +Y بالا، مقیاس متر.
+· «سنگین» یعنی همین؛ هرچه جزئیات دقیق‌تر، خروجی تمیزتر.
+
+قاعدهٔ سراسری (این بلاک را اولِ هر پرامپت می‌فهمیم):
+──────────────────────────────────────────────────────────────────
+GLOBAL_STYLE = "stylized game-ready 3D model for a mobile racing game, clean quad topology, smooth edge bevels, PBR materials, 2K baked textures, optimized for real-time engine (Godot 4), no scene props, single object, centered at origin, +Y up, meter scale"
+GLOBAL_NEGATIVE = "low poly artifacts, jagged edges, floating geometry, duplicated meshes, textures stretched, watermark, text, scene, ground plane, multiple objects, blurry, photorealistic human, extra wheels, deformed"
+
+──────────────────────────────────────────────────────────────────
+  پ ۱ — ماشینِ قهرمان: پیکانِ بوقیِ زردِ تیزپا (نسخهٔ استایلیزه)
+──────────────────────────────────────────────────────────────────
+کاربرد: مدل اصلی بازی؛ باید جانشینِ مدل فعلی شود.
+پرامپت:
+A stylized low-poly 1970s Iranian Paykan Boloughi taxi sedan, hero car of a
+racing game, warm taxi-yellow glossy paint with subtle wear, black vinyl roof,
+chrome bumpers and chrome grille, round vintage headlights, small square
+indicators, whitewall tires with chrome hubcaps, slight rake stance like a
+race car, hand-painted look with crisp color separation, nostalgic and
+friendly character design, readable silhouette from all angles.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Topology: Quad · Symmetry: ON · Tri: 15k–25k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۲ — ماشینِ قهرمان: نسخهٔ نیمه‌واقعی (برای مقایسه)
+──────────────────────────────────────────────────────────────────
+کاربرد: مقایسهٔ استایل استایلیزه با نیمه‌رئال؛ هرکدام بهتر بود می‌مانیم.
+پرامپت:
+A semi-realistic 1977 Paykan Boloughi (licensed Hillman Hunter variant),
+classic Iranian taxi, glossy sun-faded taxi yellow paint with authentic dust
+and stone-chip wear on lower panels, chrome front and rear bumpers with light
+patina, iconic wide chrome grille, amber vintage headlights, beige interior
+visible through windows, Iranian taxi roof-sign box on top, period-correct
+steel wheels with small chrome caps, subtle body imperfections, museum-clean
+presentation.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Realistic · Topology: Quad · Symmetry: ON · Tri: 30k–50k · Texture: 2K PBR + Roughness
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۳ — هلیا، رانندهٔ تیزپا (شخصیتِ کامل)
+──────────────────────────────────────────────────────────────────
+کاربرد: کنار ماشین در گاراژ و صحنهٔ قهرمانی؛ همین چهره باید شبیه
+پرترهٔ فعلی بماند (روسری سرمه‌ای، کت قرمز مسابقه).
+پرامپت:
+A stylized 3D game character of a young Iranian woman race driver named
+Helia, warm confident smile, large brown eyes, long black hair, wearing a
+navy blue headscarf, bright red racing jacket with embroidered team patches
+and white racing stripes, dark blue jeans, white sneakers, one hand giving a
+thumbs up, heroic cheerful personality, T-pose ready for rigging, clean
+stylized proportions like modern mobile games, readable at 3 meters distance.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Topology: Quad · Symmetry: ON · Tri: 20k–35k · Texture: 2K PBR · Rig-ready T-pose
+منفی: + GLOBAL_NEGATIVE + "closed eyes, sad expression"
+
+──────────────────────────────────────────────────────────────────
+  پ ۴ — چرخِ اسپرت با رینگِ کرم‌رنگ
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A single stylized vintage car wheel, whitewall tire with clean sidewall
+lettering-free surface, cream painted steel rim with chrome center cap and
+eight small ventilation holes, subtle tire tread, slightly chunky
+cartoon-friendly proportions, perfect cylinder alignment, wheel axis along X.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: Radial · Tri: 4k–8k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۵ — برجِ میلاد (نسخهٔ بازی)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+Milad Tower of Tehran as a stylized game asset, accurate iconic silhouette:
+large octagonal shaft, bulbous head pod with triangular window patterns and
+a rooftop antenna spire, cream white and light gray concrete with subtle
+panel lines, slight stylization for mobile game, no interior, sealed solid
+mesh, readable from 500 meters in game camera distance.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 8k–15k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE + "antenna bent, head deformed"
+
+──────────────────────────────────────────────────────────────────
+  پ ۶ — برجِ آزادی
+──────────────────────────────────────────────────────────────────
+پرامپت:
+Azadi Tower of Tehran as a stylized game asset, iconic Y-shaped marble
+monument with the tall pointed arch opening, clad in pale cream Isfahan
+stone bricks with subtle geometric line pattern, clean sharp geometry,
+sealed solid mesh suitable for a city racing game skyline, no interior.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 8k–15k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۷ — ساختمانِ آجوریِ تهران (کوتاهِ ۳ طبقه)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A three-story old Tehran brick apartment building, warm terracotta bricks
+with visible mortar, row of rectangular windows with beige frames and small
+air-conditioner boxes, arched entrance door with wooden double door, flat
+roof with parapet and a small water tank and satellite dish, iron balconies
+with dark green railings, stylized clean geometry for mobile game city.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 10k–18k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۸ — ساختمانِ مدرنِ شیشه‌ای (۱۲ طبقه)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A modern twelve-story Tehran office tower, blue-tinted glass curtain wall
+with horizontal white mullion bands, slight setback at ninth floor, rooftop
+mechanical box and antenna, clean sharp edges, subtle reflection baked into
+emissive-free PBR glass, stylized for mobile game skyline, sealed mesh.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 10k–16k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۹ — خانهٔ قدیمی با ایوانِ چوبی
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A nostalgic two-story old Tehran house, whitewashed adobe walls with warm
+aged stains, wooden columned iwan balcony on the second floor with carved
+brackets, traditional orsi sash windows with colored glass grid, clay tile
+roof edge, small courtyard gate with blue wooden door, storybook-clean
+stylization for a city racing game.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 12k–20k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۰ — کوهِ توچال با برف
+──────────────────────────────────────────────────────────────────
+پرامپت:
+Tochal mountain as a stylized background mountain, elongated rocky ridge
+with snow-capped peaks and scree slopes, warm rock color with cool violet
+shadow tint for sunset scenes, low detail silhouette-friendly geometry,
+backdrop scale (500m wide), sealed back-free mesh for city skyline use.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 5k–10k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۱ — چنارِ خیابانی
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A Tehran street plane tree (chenar), thick mottled cream-and-brown trunk,
+lush rounded green canopy built from clustered stylized foliage spheres,
+gentle asymmetry, 7 meters tall, clean silhouette, mobile-friendly poly
+budget, no ground or grass at base.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 4k–8k · Texture: 1K + Alpha foliage
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۲ — پایهٔ چراغِ برقِ خیابانی
+──────────────────────────────────────────────────────────────────
+پرامپت:
+An Iranian city street lamp, tall curved dark green metal arm over the road
+with a caged lamp head, second straight arm with traffic camera box,
+segmented concrete base with small Iranian municipality emblem plaque,
+wiring conduit visible, 9 meters tall, stylized clean metal.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 3k–6k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۳ — تابلوی راهنمایی و رانندگی (با نوشتهٔ فارسی)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+An Iranian road sign assembly, galvanized grey pole with two octagonal
+red STOP sign panels, the Persian word "توقف" in white on the octagon,
+plus a round blue mandatory panel with white arrow, subtle reflective
+sheeting look, clean geometry, text baked crisp into 2K texture.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 2k–5k · Texture: 2K (تکسچر فارسی باید تیز باشد)
+منفی: + GLOBAL_NEGATIVE + "gibberish letters, latin text"
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۴ — پلِ عابَرِ پیاده
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A Tehran pedestrian steel footbridge spanning 18 meters, rusty-red painted
+steel truss with diagonal members, corrugated metal roof over the walkway,
+staircase ramps on both ends with handrails, small Iranian flag banner
+mounted on side, stylized clean geometry for mobile city game.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 12k–20k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۵ — تاکسیِ کرم‌رنگ (ترافیک)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A classic Iranian cream-white Paykan taxi, compact friendly proportions,
+cream body with worn paint around door edges, orange roof taxi-sign, black
+bumper guards, tiny Iranian checkered taxi stripe on sides, closed windows
+with tint, same chassis family as hero car but calmer presentation.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 8k–14k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۶ — پژوی سفیدِ شهری (ترافیک)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A white Iranian Peugeot 405 sedan, familiar everyday city car, clean white
+paint with light dirt, black plastic bumpers and side strips, simple steel
+wheels with plastic covers, slightly rounded 1990s design language, closed
+cabin, mobile-game-friendly stylization.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 8k–14k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۷ — موتورسیکلتِ پیک
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A delivery motorcycle for city traffic, teal body panels with a square
+insulated delivery box on the rear rack, simple round headlight, exposed
+frame, small saddlebags, kickstand deployed, stylized and friendly, all
+mechanical parts merged cleanly for game use.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 6k–10k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۸ — موانعِ جاده: کاورپلاست، سطلِ زباله، فلاورباکس
+──────────────────────────────────────────────────────────────────
+پرامپت (سه بار اجرا شود، هر بار یکی):
+الف) An orange-white striped plastic road construction barrier, two legs,
+weathered with scuffs, Iranian municipality style.
+ب) A green municipal street waste bin with domed lid and side handles,
+small Persian recycling sticker, slight dent.
+ج) A rectangular concrete flowerbox with red geraniums and green leaves,
+ornamental diagonal groove pattern.
++ GLOBAL_STYLE (برای هر سه)
+تنظیمات: Tri: 1k–3k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۱۹ — ایستگاهِ اتوبوسِ BRT
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A Tehran BRT bus stop station, long glazed metal shelter with turquoise
+roof band and Persian municipality branding, ticket validating pole,
+digital route board with blank screen, clean steel columns, subtle graffiti
+decals, stylized for mobile city racing game.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 8k–14k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۲۰ — رامپ و سکوی پرشِ جاده
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A modular asphalt stunt ramp for an arcade racing game, wedge shape 4
+meters wide, worn asphalt texture with yellow painted chevrons on the
+incline face, steel edge guards, tire scuff marks, perfect flat contact
+with ground plane, no underside details needed.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 2k–4k · Texture: 1K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۲۱ — جامِ قهرمانیِ تیزپا
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A heroic golden champion trophy for an Iranian racing game, tall cup with
+two curved handles, winged Pahlavi-inspired finial on top, dark green marble
+base with an empty gold nameplate, celebratory shine, hand-painted stylized
+metal, presentation ready for podium scene.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 6k–10k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۲۲ — دروازهٔ گاراژِ شروع
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A starting garage gate for a Tehran racing game, wide corrugated metal
+rolling shutter in deep blue with worn paint stripes, brick wall frame with
+a small canopy and two hanging lamps, Iranian license plate shop sign above
+the door, sealed mesh, game-ready.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: ON · Tri: 4k–8k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۲۳ — آسمان‌خراشِ نوساز (۲۴ طبقه، خطِ آسمانِ جدید)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A modern 24-story Tehran residential high-rise, staggered rectangular
+prism massing with warm sandstone cladding and deep-set balconies with
+glass railings, crown mechanical floor, construction crane hook point on
+roof, stylized clean for skyline backdrop, sealed mesh.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 10k–16k · Texture: 2K PBR
+منفی: + GLOBAL_NEGATIVE
+
+──────────────────────────────────────────────────────────────────
+  پ ۲۴ — بیلبوردِ تبلیغاتیِ کنارِ جاده (با فضای فارسی)
+──────────────────────────────────────────────────────────────────
+پرامپت:
+A roadside billboard on two steel legs, 6x3 meter blank white panel framed
+in dark steel with small floodlights on top, ladder on one leg, the panel
+texture left mostly blank with a subtle orange border so Persian text can
+be baked later, clean geometry, game-ready.
++ GLOBAL_STYLE
+تنظیمات: Art Style: Stylized · Symmetry: OFF · Tri: 2k–4k · Texture: 2K (پنل سفید برای نوشتهٔ فارسیِ بعدی)
+منفی: + GLOBAL_NEGATIVE + "text, letters, logos"
+
+──────────────────────────────────────────────────────────────────
+  بخشِ دوم — دستورِ کار برای هنرمندِ انسانی (اگر کمکِ بیرونی انسان بود)
+──────────────────────────────────────────────────────────────────
+اگر تصمیم گرفتیم هنرمند بگیریم، این را همان بفرست:
+· هدف: ۲۵ مدلِ فهرست بالا با سبک «استایلیزهٔ دست‌ساز» هماهنگ با اسکرین‌شات‌های
+  موجود در ema/tasavir/ (منو، مسابقه، پلاک، میلاد).
+· تحویل: GLB + تکسچر PBR 2K، مقیاس متر، +Y، مبدأ زیرِ وسطِ مدل.
+· بودجهٔ مثلث‌ها: ماشین قهرمان ≤25k، ساختمان‌ها ≤18k، پروپ‌ها ≤5k.
+· سبک مرجع: «Hollow Knight سادگیِ فرم + Forza Horizon رنگ و شادی» —
+  نه رئالِ خاکستری، نه کارتونِ بچگانه.
+· تستِ پذیرش: هر مدل باید در صحنهٔ test/live شون سه‌زاویه‌ای تمیز باشد.
+
+──────────────────────────────────────────────────────────────────
+  بخشِ سوم — یادداشتِ صادقانه (پاسخ به «مشکل از موتور است یا من؟»)
+──────────────────────────────────────────────────────────────────
+· موتور (گودوت) مقصر نیست — سه‌بعدی روی گوشیِ تو سالم و روان اجرا شده.
+· ضعفِ من: ساختنِ مدلِ سه‌بعدیِ زیبا فقط با کد و بدون دستِ هنری — این سقف
+  من است و صادقانه گفتم.
+· راهِ رفع: یا سرویسِ هوش مصنوعیِ سه‌بعدی با این پرامپت‌ها، یا هنرمندِ
+  انسانی با بخشِ دوم. خروجی هر مسیر را کنارِ مدل فعلی گذاشتیم مقایسه
+  می‌کنیم؛ هرچه بهتر بود، می‌ماند.
+· آزمایشِ قبلی TripoSR (عکس‌به‌سه‌بعدی) هم در to/abzarha/azmayesh_ai.py هست
+  و نتیجه‌اش در to/tasavir/azmayesh_ai/ — ملاکِ مقایسه.

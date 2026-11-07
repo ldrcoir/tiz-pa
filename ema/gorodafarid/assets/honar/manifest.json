@@ -1,0 +1,90 @@
+{
+ "gordafarid_doid": [
+  184,
+  250
+ ],
+ "gordafarid_zadan": [
+  235,
+  250
+ ],
+ "gordafarid_tirandaz": [
+  231,
+  250
+ ],
+ "savare": [
+  287,
+  270
+ ],
+ "asb": [
+  198,
+  210
+ ],
+ "sarbaz": [
+  142,
+  230
+ ],
+ "div": [
+  285,
+  330
+ ],
+ "kuchak": [
+  73,
+  120
+ ],
+ "div_sefid": [
+  448,
+  470
+ ],
+ "enar": [
+  73,
+  84
+ ],
+ "senobar": [
+  294,
+  390
+ ],
+ "dargah": [
+  494,
+  620
+ ],
+ "aseman": [
+  1344,
+  768
+ ],
+ "kuh": [
+  1344,
+  768
+ ],
+ "shahr": [
+  1344,
+  768
+ ],
+ "kash": [
+  1024,
+  1024
+ ],
+ "dokme_chap": [
+  96,
+  96
+ ],
+ "dokme_rast": [
+  96,
+  96
+ ],
+ "dokme_parsh": [
+  96,
+  96
+ ],
+ "dokme_shemshir": [
+  96,
+  96
+ ],
+ "dokme_kaman": [
+  96,
+  96
+ ],
+ "dokme_savari": [
+  96,
+  96
+ ]
+}
