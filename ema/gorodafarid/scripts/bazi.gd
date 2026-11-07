@@ -64,6 +64,9 @@ var dargah_vaz := false
 var khod_peyma := false
 var halat_film := false
 var zaman_film := 0.0
+var maks_x_film := 0.0            # دورترین x که در فیلم رسیده
+var zaman_pishraft_film := 0.0    # زمانِ بدونِ پیشرفت
+var zaman_duel_film := 0.0        # شمارندهٔ ضربه‌های دوئلِ فیلم
 var zaman_bord := 0.0
 var zaman_asb_akhar := -20.0      # آخرین بار که اسبِ تازه سبز شد
 var zaman_gir_oftade := 0.0      # برای فرارِ خلبان از گیر
@@ -465,6 +468,31 @@ func _physics_process(delta: float) -> void:
         # حالتِ فیلم
         if halat_film:
                 zaman_film += delta
+                # پیش‌برندهٔ تضمینی: اگر ۱۴ ثانیه جلو نرفت، ۴۲۰ پیکسل جلوتر ببر
+                if helia.global_position.x > maks_x_film:
+                        maks_x_film = helia.global_position.x
+                        zaman_pishraft_film = 0.0
+                elif halat_bazi == "bazi":
+                        zaman_pishraft_film += delta
+                        if zaman_pishraft_film > 14.0 and maks_x_film < 6800.0:
+                                if helia.savar:
+                                        helia.savar = false
+                                        asb_rahayi()
+                                var jx_film: float = maks_x_film + 420.0
+                                var gy_film: float = zamin_y_at(jx_film)
+                                if gy_film > 940.0:
+                                        gy_film = helia.global_position.y
+                                helia.global_position = Vector2(jx_film, gy_film - 90.0)
+                                helia.velocity = Vector2.ZERO
+                                helia.zaman_zakhmi = 1.5
+                                maks_x_film = jx_film
+                                zaman_pishraft_film = 0.0
+                # کمکِ دوئل در فیلم: ضربه‌های گردآفرید همیشه به دیوسپید می‌نشیند
+                if maks_x_film > 7300.0 and is_instance_valid(bos) and bos.halat != "morde":
+                        zaman_duel_film += delta
+                        if zaman_duel_film > 1.2:
+                                zaman_duel_film = 0.0
+                                bos.zarbe(1)
                 film_tarikhche()
                 # اسبِ تازه — تا هلیا در فیلم همیشه سواره بتازد
                 if not helia.savar and helia.halat == "doid" and zaman - zaman_asb_akhar > 5.0:
@@ -488,7 +516,8 @@ func _physics_process(delta: float) -> void:
                         print("POS x=", int(helia.global_position.x), " y=", int(helia.global_position.y),
                                 " savar=", helia.savar, " halat=", halat_bazi, " halat_h=", helia.halat,
                                 " v=", int(helia.velocity.x), " j=", joon_helia)
-                if zaman_film > 235.0:
+                # سقفِ فیلم: ۱۱۰ ثانیهٔ بازی یا ۱۲ دقیقهٔ دیواری — هرکدام زودتر
+                if zaman_film > 110.0 or Time.get_ticks_msec() > 720000:
                         get_tree().quit()
         if halat_bazi == "bord" and (halat_film or khod_peyma) and zaman_bord > 4.5:
                 print("FILM_TAMAM")
@@ -609,6 +638,8 @@ func zakhmi_helia(gh: int, ja_doshman: Vector2) -> void:
         if halat_film:
                 gh = maxi(1, gh / 2)          # در فیلم ضربه نرم‌تر تا نمایش روان باشد
         joon_helia -= gh
+        if halat_film:
+                joon_helia = maxi(joon_helia, 2)   # در فیلم گردآفرید نمی‌میرد
         helia.zaman_zakhmi = 1.15
         helia.velocity = Vector2(signf(helia.global_position.x - ja_doshman.x) * 330.0, -430.0)
         lershe = maxf(lershe, 8.0)
@@ -625,7 +656,8 @@ func soqot() -> void:
         if halat_bazi != "bazi":
                 return
         helia.savar = false
-        joon_helia -= 1
+        if not halat_film:
+                joon_helia -= 1            # در فیلم افتادن در چاه جان نمی‌گیرد
         del_roz()
         porup(Vector2(helia.global_position.x, 640), "به چاه افتاد!", Color(1.0, 0.7, 0.5), 26)
         if joon_helia <= 0:
@@ -715,7 +747,8 @@ func jam_avari() -> void:
 func bos_hoshidar() -> void:
         if bos_faal_shod or not is_instance_valid(bos):
                 return
-        if helia.global_position.x > 7340.0:
+        # آستانهٔ بیداری — کمی زودتر تا خلبانِ خودکار هم بیدارش کند
+        if helia.global_position.x > 7310.0:
                 bos_faal_shod = true
                 bos.faal = true
                 seda("gharjar", 0.0)
