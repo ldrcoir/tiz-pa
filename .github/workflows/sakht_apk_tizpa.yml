@@ -19,18 +19,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: javaye_17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: nasb_e_android_sdk
-        uses: android-actions/setup-android@v3
-
+      # رانرهای ubuntu از قبل Android SDK دارند؛ فقط licenses و
+      # بیلد-تولزِ موردنیازِ گودوت را کامل می‌کنیم
       - name: kamel_kardan_e_sdk
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34" > /dev/null
+          SDKM=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+          yes | $SDKM --licenses > /dev/null 2>&1 || true
+          $SDKM "platform-tools" "build-tools;34.0.0" "platforms;android-34" > /dev/null
+          $SDKM --list_installed | head -20
 
       - name: sakht_e_kelid_e_emza_debug
         # همان کلیدِ اشکال‌زدایی که تنظیماتِ خروجی انتظارش را دارد
