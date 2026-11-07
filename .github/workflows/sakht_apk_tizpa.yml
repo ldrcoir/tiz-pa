@@ -14,6 +14,8 @@ on:
 jobs:
   sakht_apk:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: daryaft_e_code
         uses: actions/checkout@v4
@@ -74,3 +76,13 @@ jobs:
           path: ema/tizpa/build/*.apk
           retention-days: 90
           if-no-files-found: error
+
+      - name: chap_dar_releases
+        # انتشار در بخشِ Releases با نشانیِ ثابت — دانلودِ تک‌کلیکی
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete "akharin" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "akharin" ema/tizpa/build/tizpa_v0.2.apk \
+            --title "تیزپا — نسخهٔ ۰.۲ (APK)" \
+            --notes "تازه‌ترین نسخهٔ خودکارِ بازی. فایل را بگیر، نصب کن، بازی کن. هر پوشِ تازه، همین صفحه به‌روز می‌شود."
