@@ -66,7 +66,7 @@ jobs:
       - name: sakht_e_apk
         run: |
           mkdir -p ema/tizpa/build
-          godot --headless --path ema/tizpa --export-debug "Android" build/tizpa_v0.2.apk
+          godot --headless --path ema/tizpa --export-debug "Android" build/tizpa_v0.18.apk
           ls -la ema/tizpa/build/
 
       - name: enteshar_e_apk
@@ -83,6 +83,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete "akharin" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "akharin" ema/tizpa/build/tizpa_v0.2.apk \
-            --title "تیزپا — نسخهٔ ۰.۲ (APK)" \
+          gh release create "akharin" ema/tizpa/build/tizpa_v0.18.apk \
+            --title "تیزپا — نسخهٔ ۰.۱۸ (APK)" \
             --notes "تازه‌ترین نسخهٔ خودکارِ بازی. فایل را بگیر، نصب کن، بازی کن. هر پوشِ تازه، همین صفحه به‌روز می‌شود."
