@@ -1,0 +1,25 @@
+; پروژهٔ آزمایشی: آیا پک‌های آمادهٔ هنری (Kenney) مشکل گرافیک و انیمیشن را حل می‌کند؟
+config_version=5
+
+[application]
+
+config/name="Azmayesh_Kenney"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7")
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.53, 0.78, 0.94, 1)
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[physics]
+
+common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
