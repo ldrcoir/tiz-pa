@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" load_steps=26 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/helia/helia_ist.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/helia/helia_dovid.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/helia/helia_parsh.png" id="3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_0"]
+atlas = ExtResource("1")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_1"]
+atlas = ExtResource("1")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_2"]
+atlas = ExtResource("1")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_3"]
+atlas = ExtResource("1")
+region = Rect2(768, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_4"]
+atlas = ExtResource("1")
+region = Rect2(1024, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_5"]
+atlas = ExtResource("1")
+region = Rect2(1280, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_6"]
+atlas = ExtResource("1")
+region = Rect2(1536, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ist_7"]
+atlas = ExtResource("1")
+region = Rect2(1792, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_0"]
+atlas = ExtResource("2")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_1"]
+atlas = ExtResource("2")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_2"]
+atlas = ExtResource("2")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_3"]
+atlas = ExtResource("2")
+region = Rect2(768, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_4"]
+atlas = ExtResource("2")
+region = Rect2(1024, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_5"]
+atlas = ExtResource("2")
+region = Rect2(1280, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_6"]
+atlas = ExtResource("2")
+region = Rect2(1536, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovid_7"]
+atlas = ExtResource("2")
+region = Rect2(1792, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_parsh_0"]
+atlas = ExtResource("3")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_parsh_1"]
+atlas = ExtResource("3")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_parsh_2"]
+atlas = ExtResource("3")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_parsh_3"]
+atlas = ExtResource("3")
+region = Rect2(768, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_parsh_4"]
+atlas = ExtResource("3")
+region = Rect2(1024, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_parsh_5"]
+atlas = ExtResource("3")
+region = Rect2(1280, 0, 256, 256)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ist_7")
+}],
+"loop": true,
+"name": &"ist",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovid_7")
+}],
+"loop": true,
+"name": &"dovid",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_parsh_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_parsh_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_parsh_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_parsh_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_parsh_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_parsh_5")
+}],
+"loop": false,
+"name": &"parsh",
+"speed": 10.0
+}]
