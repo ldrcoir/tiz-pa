@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     کارگاهِ تیزپا — ابزارِ تحتِ وبِ بازی‌سازی (فقط یک فایلِ HTML، بدونِ نصب)
+     دو کارگاه در یک فایل:
+       ۱) اسپرایت‌شیت‌ساز: ورقِ فریم ← پخشِ زندهٔ انیمیشن ← خروجیِ SpriteFrames گودوت (.tres)
+       ۲) سه‌بعدی‌ساز: بارگذاریِ glb/gltf ← چیدنِ صحنه ← خروجیِ glb آمادهٔ گودوت + عکس
+     روشِ اجرا: همین فایل را در مرورگر باز کن (فقط برایِ سه‌بعدی‌ساز اینترنت لازم است)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>کارگاهِ تیزپا — اسپرایت‌شیت‌ساز و سه‌بعدی‌ساز</title>
+<style>
+  /* ── رنگ‌ها از دنیای بازی: شبِ کوهستان + نارنجیِ آتش ── */
+  :root {
+    --shab: #14121f;        /* پس‌زمینهٔ شب */
+    --safhe: #1e1b2e;       /* صفحه‌ها */
+    --khat: #332e4a;        /* خطوط */
+    --matn: #e8e4f5;        /* متنِ روشن */
+    --khamosh: #9a93b5;     /* متنِ خاموش */
+    --atash: #ff9d3b;       /* نارنجیِ آتش (تأکید) */
+    --sabz: #6ee7a0;        /* سبزِ موفقیت */
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--shab); color: var(--matn);
+    font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px;
+  }
+  header { padding: 14px 20px 0; }
+  h1 { font-size: 20px; margin: 0; color: var(--atash); }
+  .zirnev { color: var(--khamosh); font-size: 12px; margin-top: 4px; }
+  nav { display: flex; gap: 8px; padding: 12px 20px; }
+  nav button {
+    background: var(--safhe); color: var(--matn); border: 1px solid var(--khat);
+    padding: 8px 18px; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 14px;
+  }
+  nav button.ghazal { background: var(--atash); color: #1a1207; font-weight: bold; border-color: var(--atash); }
+  karzhal, .karzhal { padding: 0 20px 24px; }
+  .do_sotoon { display: grid; grid-template-columns: 1fr 320px; gap: 14px; align-items: start; }
+  @media (max-width: 900px) { .do_sotoon { grid-template-columns: 1fr; } }
+  .jaye { background: var(--safhe); border: 1px solid var(--khat); border-radius: 12px; padding: 12px; }
+  .jaye h2 { font-size: 15px; margin: 0 0 10px; color: var(--atash); }
+  canvas { image-rendering: pixelated; border-radius: 8px; background: repeating-conic-gradient(#262238 0% 25%, #201d30 0% 50%) 50% / 24px 24px; max-width: 100%; }
+  input[type=number], input[type=text], select {
+    background: #14121f; color: var(--matn); border: 1px solid var(--khat);
+    border-radius: 8px; padding: 5px 8px; font-family: inherit; width: 90px;
+  }
+  input[type=text] { width: 100%; }
+  label { display: inline-flex; align-items: center; gap: 6px; margin: 3px 0; color: var(--khamosh); }
+  button.amal {
+    background: var(--atash); border: none; color: #1a1207; font-weight: bold;
+    padding: 7px 14px; border-radius: 8px; cursor: pointer; font-family: inherit;
+  }
+  button.amal.khamoshine { background: var(--khat); color: var(--matn); font-weight: normal; }
+  .bakhsh { border-top: 1px dashed var(--khat); margin-top: 10px; padding-top: 10px; }
+  .piam { color: var(--sabz); font-size: 12px; min-height: 16px; }
+  .hoshdar { color: #ff7b7b; }
+  textarea { width: 100%; min-height: 140px; background: #14121f; color: var(--matn);
+    border: 1px solid var(--khat); border-radius: 8px; font-family: monospace; font-size: 11px; direction: ltr; }
+  .chideman { display: flex; flex-wrap: wrap; gap: 6px; }
+  .halghe_fr { border: 1px solid var(--khat); border-radius: 8px; padding: 6px 10px; cursor: pointer; background: #171426; }
+  .halghe_fr.ghazal { border-color: var(--atash); background: #2a2138; }
+  .listi { max-height: 180px; overflow: auto; }
+  .khatchin { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--khamosh); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔨 کارگاهِ تیزپا</h1>
+  <div class="zirnev">ورقِ فریم ← انیمیشنِ گودوت &nbsp;|&nbsp; مدلِ سه‌بعدی ← صحنه ← خروجیِ glb &nbsp;—&nbsp; همه‌چیزِ تحتِ وب و رایگان</div>
+</header>
+
+<nav>
+  <button id="tab_sheet" class="ghazal">🎨 اسپرایت‌شیت‌ساز</button>
+  <button id="tab_3d">🧊 سه‌بعدی‌ساز</button>
+</nav>
+
+<!-- ════════════════ کارگاهِ اسپرایت‌شیت ════════════════ -->
+<div id="karzhal_sheet" class="karzhal">
+  <div class="do_sotoon">
+    <div>
+      <div class="jaye">
+        <h2>ورقِ فریم</h2>
+        <input type="file" id="vorudi_file" accept="image/*">
+        <div style="margin-top:8px">
+          <label>ستون‌ها <input type="number" id="sotoon" value="4" min="1"></label>
+          <label>سطرها <input type="number" id="sator" value="1" min="1"></label>
+          <label>فاصلهٔ ضخیم <input type="number" id="fasele" value="0" min="0"></label>
+          <label>زوم <input type="number" id="zoom" value="1" min="0.2" step="0.1"></label>
+        </div>
+        <div style="margin-top:8px"><canvas id="bomme_sheet" width="768" height="256"></canvas></div>
+        <div class="khatchin" style="margin-top:6px">
+          <span>روی هر خانه بزن تا به انیمیشنِ فعلی اضافه شود (ترتیبِ کلیک = ترتیبِ فریم‌ها)</span>
+        </div>
+      </div>
+      <div class="jaye" style="margin-top:12px">
+        <h2>پیش‌نمایشِ زنده</h2>
+        <canvas id="bomme_pishnamayesh" width="256" height="256"></canvas>
+        <div style="margin-top:8px">
+          <button class="amal" id="dokme_pakhsh">⏸ توقف</button>
+          <label style="margin-right:12px">آینه ⬌ <input type="checkbox" id="ayene"></label>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="jaye">
+        <h2>انیمیشن‌ها</h2>
+        <div class="chideman" id="list_anima"></div>
+        <div class="bakhsh">
+          <label>نامِ انیمیشنِ جدید</label>
+          <input type="text" id="esm_jadid" placeholder="dovid / zadan / parsh ...">
+          <button class="amal khamoshine" id="dokme_anima_jadid">＋ بساز</button>
+        </div>
+        <div class="bakhsh">
+          <label>سرعت (فریم بر ثانیه) <input type="number" id="sorat" value="10" min="1" style="width:70px"></label><br>
+          <label><input type="checkbox" id="halghe" checked> تکرارِ بی‌پایان (loop)</label><br>
+          <button class="amal khamoshine" id="dokme_yeki_kam">－ فریمِ آخر</button>
+          <button class="amal khamoshine" id="dokme_pak">خالیِ انیمیشن</button>
+        </div>
+      </div>
+      <div class="jaye" style="margin-top:12px">
+        <h2>خروجیِ گودوت</h2>
+        <button class="amal" id="dokme_tres">📦 ساختِ SpriteFrames (tres)</button>
+        <button class="amal khamoshine" id="dokme_namayesh_tres">نمایشِ کد</button>
+        <button class="amal khamoshine" id="dokme_danlod_tres">دانلودِ .tres</button>
+        <div class="piam" id="piam_tres"></div>
+        <textarea id="khorooji_tres" style="margin-top:8px; display:none"></textarea>
+        <div class="khatchin" style="margin-top:8px">
+          مسیرِ تصویرِ داخلِ tres:
+          <input type="text" id="masir_tres" style="direction:ltr" value="res://assets/honar/varagh.png">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ کارگاهِ سه‌بعدی ════════════════ -->
+<div id="karzhal_3d" class="karzhal" style="display:none">
+  <div class="do_sotoon">
+    <div>
+      <div class="jaye">
+        <h2>صحنهٔ سه‌بعدی</h2>
+        <div id="khata_cdn" class="piam hoshdar" style="display:none">
+          کتابخانهٔ three.js از CDN بار نشد — اینترنت لازم است.
+        </div>
+        <input type="file" id="vorudi_3d" accept=".glb,.gltf" multiple>
+        <div style="margin-top:8px"><canvas id="bomme_3d" width="760" height="480" style="image-rendering:auto"></canvas></div>
+        <div class="khatchin" style="margin-top:6px">
+          <span>ماوس: چرخش | اسکرول: نزدیک‌شدن | درگ‌راست: جابه‌جاییِ دوربین</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="jaye">
+        <h2>اجزای صحنه</h2>
+        <div class="listi" id="list_ajsam"></div>
+        <div class="bakhsh" id="tanazom_kar" style="display:none">
+          <label>x <input type="number" id="m_x" step="0.1" style="width:70px"></label>
+          <label>y <input type="number" id="m_y" step="0.1" style="width:70px"></label>
+          <label>z <input type="number" id="m_z" step="0.1" style="width:70px"></label><br>
+          <label>چرخشِ y (درجه) <input type="number" id="m_ry" step="5" style="width:70px"></label>
+          <label>مقیاس <input type="number" id="m_s" step="0.1" min="0.01" style="width:70px"></label><br>
+          <button class="amal khamoshine" id="dokme_hazf">🗑 حذفِ جزء</button>
+        </div>
+      </div>
+      <div class="jaye" style="margin-top:12px">
+        <h2>خروجی</h2>
+        <button class="amal" id="dokme_glb">📦 خروجیِ glb (آمادهٔ گودوت)</button>
+        <button class="amal khamoshine" id="dokme_aks">📸 عکسِ PNG</button>
+        <div class="piam" id="piam_3d"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+/* ═══════════════════════════ بخشِ ۱: اسپرایت‌شیت‌ساز ═══════════════════════════ */
+const $ = id => document.getElementById(id);
+
+let tasvir = null;          // تصویرِ ورودی
+let halatha = [];           // تمامِ انیمیشن‌ها: { esm, framha:[shomare], sorat, halghe }
+let ghazal = 0;             // انیمیشنِ انتخاب‌شده
+let darHarkat = true;       // وضعیتِ پخش
+let sayeh = 0;              // شمارندهٔ زمان برایِ پیش‌نمایش
+
+/* ناحیهٔ هر خانه از ورق (ستون/سطر/فاصله) */
+function khiyaban(i) {
+  const sotoon = +$('sotoon').value, sator = +$('sator').value, fasele = +$('fasele').value;
+  const panj = Math.floor((tasvir.width - fasele * (sotoon - 1)) / sotoon);
+  const tool = Math.floor((tasvir.height - fasele * (sator - 1)) / sator);
+  const st = i % sotoon, sr = Math.floor(i / sotoon);
+  return { x: st * (panj + fasele), y: sr * (tool + fasele), w: panj, h: tool };
+}
+function tedadKol() { return (+$('sotoon').value) * (+$('sator').value); }
+
+/* رسمِ ورق با خطوطِ راهنما و نشانِ فریم‌های انیمیشنِ فعلی */
+function bommeSheetBekesh() {
+  if (!tasvir) return;
+  const bom = $('bomme_sheet'), zoom = +$('zoom').value;
+  bom.width = tasvir.width * zoom; bom.height = tasvir.height * zoom;
+  const d = bom.getContext('2d');
+  d.clearRect(0, 0, bom.width, bom.height);
+  d.drawImage(tasvir, 0, 0, bom.width, bom.height);
+  const sotoon = +$('sotoon').value, sator = +$('sator').value, fasele = +$('fasele').value;
+  d.strokeStyle = '#ff9d3b55'; d.lineWidth = 1;
+  for (let i = 0; i < tedadKol(); i++) {
+    const { x, y, w, h } = khiyaban(i);
+    d.strokeRect((x - fasele / 2) * zoom, (y - fasele / 2) * zoom, (w + fasele) * zoom, (h + fasele) * zoom);
+  }
+  // نشانِ ترتیبِ فریم‌های انیمیشنِ فعلی
+  const fr = halatha[ghazal]?.framha || [];
+  fr.forEach((sh, jomle) => {
+    const { x, y, w } = khiyaban(sh);
+    d.fillStyle = '#ff9d3b'; d.font = 'bold 14px monospace';
+    d.fillText(String(jomle + 1), x * zoom + 4, y * zoom + 16);
+    d.strokeStyle = '#6ee7a0'; d.lineWidth = 2;
+    d.strokeRect(x * zoom, y * zoom, w * zoom, khiyaban(sh).h * zoom);
+    d.strokeStyle = '#ff9d3b55';
+  });
+}
+
+/* کلیک روی ورق → افزودنِ آن خانه به انیمیشنِ فعلی */
+$('bomme_sheet').addEventListener('click', kh => {
+  if (!tasvir) return;
+  const zoom = +$('zoom').value, bom = $('bomme_sheet');
+  const mo = { x: (kh.clientX - bom.getBoundingClientRect().left) / zoom,
+               y: (kh.clientY - bom.getBoundingClientRect().top) / zoom };
+  for (let i = 0; i < tedadKol(); i++) {
+    const { x, y, w, h } = khiyaban(i);
+    if (mo.x >= x && mo.x < x + w && mo.y >= y && mo.y < y + h) {
+      halatha[ghazal].framha.push(i);
+      bommeSheetBekesh(); listAnima();
+      return;
+    }
+  }
+});
+
+/* پیش‌نمایشِ زنده: هر فریمِ کادرِ ۲۵۶ */
+function pishnamayeshBekesh(sh) {
+  const bom = $('bomme_pishnamayesh'), d = bom.getContext('2d');
+  d.clearRect(0, 0, bom.width, bom.height);
+  if (!tasvir || !halatha[ghazal]?.framha.length) { d.fillStyle = '#9a93b5'; d.font = '14px Vazirmatn, Tahoma'; d.fillText('فریمی نیست', 80, 128); return; }
+  const fr = halatha[ghazal].framha;
+  const shomare = fr[Math.floor(sh) % fr.length];
+  const { x, y, w, h } = khiyaban(shomare);
+  d.save();
+  if ($('ayene').checked) { d.translate(bom.width, 0); d.scale(-1, 1); }
+  d.drawImage(tasvir, x, y, w, h, 0, 0, bom.width, bom.height);
+  d.restore();
+}
+
+/* حلقهٔ پخش */
+let zamanGhabli = 0;
+function halgheZaman(zaman) {
+  const sorat = halatha[ghazal]?.sorat || 10;
+  if (darHarkat) sayeh += (zaman - zamanGhabli) / 1000 * sorat;
+  zamanGhabli = zaman;
+  pishnamayeshBekesh(sayeh);
+  requestAnimationFrame(halgheZaman);
+}
+requestAnimationFrame(halgheZaman);
+
+/* فایلِ ورودی */
+$('vorudi_file').addEventListener('change', tak => {
+  const fail = tak.target.files[0]; if (!fail) return;
+  const khondan = new FileReader();
+  khondan.onload = e => {
+    const aks = new Image();
+    aks.onload = () => {
+      tasvir = aks;
+      if (!halatha.length) halatha.push({ esm: 'ist', framha: [], sorat: 10, halghe: true });
+      bommeSheetBekesh(); listAnima();
+    };
+    aks.src = e.target.result;
+  };
+  khondan.readAsDataURL(fail);
+});
+
+/* تغییرِ ستون/سطر → بازِ رسم */
+['sotoon', 'sator', 'fasele', 'zoom'].forEach(id =>
+  $(id).addEventListener('input', () => { bommeSheetBekesh(); }));
+
+/* لیستِ انیمیشن‌ها */
+function listAnima() {
+  const ja = $('list_anima'); ja.innerHTML = '';
+  halatha.forEach((an, i) => {
+    const dokme = document.createElement('div');
+    dokme.className = 'halghe_fr' + (i === ghazal ? ' ghazal' : '');
+    dokme.textContent = `${an.esm} (${an.framha.length}فریم، ${an.sorat}fps${an.halghe ? '، حلقه' : ''})`;
+    dokme.onclick = () => { ghazal = i; sayeh = 0; listAnima(); bommeSheetBekesh(); };
+    ja.appendChild(dokme);
+  });
+  $('sorat').value = halatha[ghazal]?.sorat ?? 10;
+  $('halghe').checked = halatha[ghazal]?.halghe ?? true;
+}
+$('dokme_anima_jadid').onclick = () => {
+  const esm = $('esm_jadid').value.trim() || ('anima' + (halatha.length + 1));
+  halatha.push({ esm, framha: [], sorat: 10, halghe: true });
+  ghazal = halatha.length - 1; $('esm_jadid').value = '';
+  listAnima(); bommeSheetBekesh();
+};
+$('sorat').addEventListener('input', () => { if (halatha[ghazal]) halatha[ghazal].sorat = +$('sorat').value; listAnima(); });
+$('halghe').addEventListener('change', () => { if (halatha[ghazal]) halatha[ghazal].halghe = $('halghe').checked; listAnima(); });
+$('dokme_yeki_kam').onclick = () => { halatha[ghazal]?.framha.pop(); bommeSheetBekesh(); listAnima(); };
+$('dokme_pak').onclick = () => { halatha[ghazal].framha = []; bommeSheetBekesh(); listAnima(); };
+$('dokme_pakhsh').onclick = () => { darHarkat = !darHarkat; $('dokme_pakhsh').textContent = darHarkat ? '⏸ توقف' : '▶ پخش'; };
+
+/* ═══ قلبِ خروجی: تولیدِ فایلِ SpriteFrames گودوت (مثلِ helia_frames.tres) ═══ */
+function tresBesaz() {
+  const masir = $('masir_tres').value.trim() || 'res://assets/honar/varagh.png';
+  const ext = [`[ext_resource type="Texture2D" path="${masir}" id="1"]`];
+  const sub = [], anima = [];
+  let tedadSub = 0;
+  halatha.forEach(an => {
+    const framha = an.framha.map(sh => {
+      const { x, y, w, h } = khiyaban(sh);
+      const sid = `AtlasTexture_${an.esm}_${tedadSub++}`;
+      sub.push(`[sub_resource type="AtlasTexture" id="${sid}"]`,
+               `atlas = ExtResource("1")`,
+               `region = Rect2(${x}, ${y}, ${w}, ${h})`, '');
+      return `{\n"duration": 1.0,\n"texture": SubResource("${sid}")\n}`;
+    });
+    anima.push(`{\n"frames": [${framha.join(', ')}],\n"loop": ${an.halghe ? 'true' : 'false'},\n"name": &"${an.esm}",\n"speed": ${an.sorat}\n}`);
+  });
+  return ('[gd_resource type="SpriteFrames" load_steps=' + (1 + tedadSub + 1) + ' format=3]\n\n'
+          + ext[0] + '\n\n' + sub.join('\n').trimEnd() + '\n\n[resource]\nanimations = ['
+          + anima.join(', ') + ']\n');
+}
+$('dokme_tres').onclick = () => {
+  const kod = tresBesaz();
+  navigator.clipboard.writeText(kod).then(() =>
+    $('piam_tres').textContent = '✔ کدِ tres کپی شد — در گودوت فایلِ .tres بساز و بچسبان');
+};
+$('dokme_namayesh_tres').onclick = () => {
+  const ja = $('khorooji_tres'); ja.style.display = ja.style.display === 'none' ? 'block' : 'none';
+  ja.value = tresBesaz();
+};
+$('dokme_danlod_tres').onclick = () => {
+  const blob = new Blob([tresBesaz()], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'varagh_frames.tres'; a.click();
+};
+
+/* ═══════════════════════════ بخشِ ۲: سه‌بعدی‌ساز ═══════════════════════════ */
+let THREE, GLTFLoader, GLTFExporter, OrbitControls;   // کتابخانه‌ها
+let sahne, dorbin, rendar, grid, intekhab = -1;
+const ajsam = [];
+
+async function tashkil3D() {
+  try {
+    THREE = await import('three');
+    ({ GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'));
+    ({ GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js'));
+    ({ OrbitControls } = await import('three/addons/controls/OrbitControls.js'));
+  } catch (e) { $('khata_cdn').style.display = 'block'; return false; }
+
+  const bom = $('bomme_3d');
+  rendar = new THREE.WebGLRenderer({ canvas: bom, antialias: true, preserveDrawingBuffer: true });
+  rendar.setSize(760, 480, false);
+  sahne = new THREE.Scene(); sahne.background = new THREE.Color(0x1a1726);
+  dorbin = new THREE.PerspectiveCamera(55, 760 / 480, 0.1, 500);
+  dorbin.position.set(6, 5, 8);
+  const ruyshan = new THREE.HemisphereLight(0xcfd6ff, 0x2a2338, 1.0);
+  const khorshid = new THREE.DirectionalLight(0xffffff, 1.6); khorshid.position.set(5, 8, 4);
+  sahne.add(ruyshan, khorshid);
+  grid = new THREE.GridHelper(20, 20, 0x5a5178, 0x332e4a); sahne.add(grid);
+  new OrbitControls(dorbin, bom);
+  halghe3D();
+  return true;
+}
+function halghe3D() { requestAnimationFrame(halghe3D); rendar.render(sahne, dorbin); }
+
+/* بارگذاریِ مدل‌ها */
+$('vorudi_3d').addEventListener('change', async tak => {
+  if (!THREE && !(await tashkil3D())) return;
+  for (const fail of tak.target.files) {
+    const khondan = new FileReader();
+    khondan.onload = e => {
+      new GLTFLoader().parse(e.target.result, '', gltf => {
+        const mojarad = gltf.scene;
+        // تنظیمِ اندازه: هر مدل به بلندیِ حدودِ ۲ واحد می‌آید تا صحنه یکدست باشد
+        const jaba = new THREE.Box3().setFromObject(mojarad);
+        const olgo = jaba.getSize(new THREE.Vector3()).y || 1;
+        mojarad.scale.setScalar(2 / olgo);
+        const mahal = new THREE.Vector3(ajsam.length * 2.5 - (ajsam.length) * 1.25, 0, 0);
+        mojarad.position.copy(mahal);
+        sahne.add(mojarad);
+        ajsam.push({ esm: fail.name, mojarad });
+        listAjsam();
+        $('piam_3d').textContent = `✔ ${fail.name} اضافه شد`;
+      }, khata => $('piam_3d').textContent = 'خطا در مدل: ' + khata.message);
+    };
+    khondan.readAsArrayBuffer(fail);
+  }
+});
+
+function listAjsam() {
+  const ja = $('list_ajsam'); ja.innerHTML = '';
+  ajsam.forEach((j, i) => {
+    const dokme = document.createElement('div');
+    dokme.className = 'halghe_fr' + (i === intekhab ? ' ghazal' : '');
+    dokme.textContent = j.esm;
+    dokme.onclick = () => { intekhab = i; namayeshTanazom(); listAjsam(); };
+    ja.appendChild(dokme);
+  });
+}
+function namayeshTanazom() {
+  $('tanazom_kar').style.display = intekhab >= 0 ? 'block' : 'none';
+  if (intekhab < 0) return;
+  const mo = ajsam[intekhab].mojarad;
+  $('m_x').value = mo.position.x.toFixed(2); $('m_y').value = mo.position.y.toFixed(2);
+  $('m_z').value = mo.position.z.toFixed(2);
+  $('m_ry').value = THREE.MathUtils.radToDeg(mo.rotation.y).toFixed(0);
+  $('m_s').value = mo.scale.x.toFixed(2);
+}
+['m_x', 'm_y', 'm_z', 'm_ry', 'm_s'].forEach(id => $(id).addEventListener('input', () => {
+  if (intekhab < 0) return;
+  const mo = ajsam[intekhab].mojarad;
+  mo.position.set(+$('m_x').value, +$('m_y').value, +$('m_z').value);
+  mo.rotation.y = THREE.MathUtils.degToRad(+$('m_ry').value);
+  const s = Math.max(0.01, +$('m_s').value); mo.scale.setScalar(s);
+}));
+$('dokme_hazf').onclick = () => {
+  if (intekhab < 0) return;
+  sahne.remove(ajsam[intekhab].mojarad); ajsam.splice(intekhab, 1);
+  intekhab = -1; namayeshTanazom(); listAjsam();
+};
+
+/* خروجیِ glb — فایلِ واحدِ آمادهٔ درگ‌کردن در گودوت */
+$('dokme_glb').onclick = () => {
+  if (!sahne) return;
+  const faqatAjsam = new THREE.Group();
+  ajsam.forEach(j => faqatAjsam.add(j.mojarad.clone(true)));
+  new GLTFExporter().parse(faqatAjsam, natije => {
+    const blob = new Blob([natije], { type: 'model/gltf-binary' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'sahne_tizpa.glb'; a.click();
+    $('piam_3d').textContent = '✔ sahne_tizpa.glb ذخیره شد — مستقیم در گودوت بکش';
+  }, khata => $('piam_3d').textContent = 'خطا: ' + khata, { binary: true });
+};
+$('dokme_aks').onclick = () => {
+  if (!rendar) return;
+  const a = document.createElement('a');
+  a.href = $('bomme_3d').toDataURL('image/png'); a.download = 'aks_sahne.png'; a.click();
+};
+
+/* ═══════════════════════════ سوئیچِ تب‌ها ═══════════════════════════ */
+$('tab_sheet').onclick = () => {
+  $('karzhal_sheet').style.display = 'block'; $('karzhal_3d').style.display = 'none';
+  $('tab_sheet').classList.add('ghazal'); $('tab_3d').classList.remove('ghazal');
+};
+$('tab_3d').onclick = async () => {
+  $('karzhal_sheet').style.display = 'none'; $('karzhal_3d').style.display = 'block';
+  $('tab_3d').classList.add('ghazal'); $('tab_sheet').classList.remove('ghazal');
+  if (!THREE) await tashkil3D();
+};
+</script>
+</body>
+</html>
