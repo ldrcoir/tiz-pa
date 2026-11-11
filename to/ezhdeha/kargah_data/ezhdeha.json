@@ -1,0 +1,86 @@
+{
+ "frame": 256,
+ "tabe": 248,
+ "kastumha": [
+  {
+   "esm": "ezhdeha_asli",
+   "esm_fa": "عادی",
+   "varagh": "ezhdeha_asli.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_jadugar",
+   "esm_fa": "جادوگر",
+   "varagh": "ezhdeha_jadugar.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_polis",
+   "esm_fa": "پلیس",
+   "varagh": "ezhdeha_polis.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_faza",
+   "esm_fa": "فضانورد",
+   "varagh": "ezhdeha_faza.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_daryayi",
+   "esm_fa": "دزد دریایی",
+   "varagh": "ezhdeha_daryayi.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_shah",
+   "esm_fa": "شاه",
+   "varagh": "ezhdeha_shah.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_zemestani",
+   "esm_fa": "زمستانی",
+   "varagh": "ezhdeha_zemestani.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_ranande",
+   "esm_fa": "مسابقه‌ای",
+   "varagh": "ezhdeha_ranande.webp",
+   "tedad_fram": 11
+  },
+  {
+   "esm": "ezhdeha_ninja",
+   "esm_fa": "نینجا",
+   "varagh": "ezhdeha_ninja.webp",
+   "tedad_fram": 11
+  }
+ ],
+ "harekat": {
+  "ist": {
+   "az": 0,
+   "tedad": 2,
+   "sorat": 6,
+   "halghe": true
+  },
+  "doid": {
+   "az": 2,
+   "tedad": 4,
+   "sorat": 12,
+   "halghe": true
+  },
+  "parsh": {
+   "az": 6,
+   "tedad": 3,
+   "sorat": 8,
+   "halghe": true
+  },
+  "dam": {
+   "az": 9,
+   "tedad": 2,
+   "sorat": 6,
+   "halghe": true
+  }
+ }
+}
