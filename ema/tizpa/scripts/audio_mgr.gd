@@ -16,7 +16,10 @@ func _ready() -> void:
         # سانتی‌ها بعد از اولین فریم خوانده می‌شوند — بوت چندصدم سریع‌تر، بدون لکنت
         call_deferred("_sfx_bekhon")
         pakhsh_ahang = AudioStreamPlayer.new()
-        var masire_ahang := "res://assets/audio/music_loop.ogg"
+        # آهنگِ واقعیِ مسابقه‌ای — قطعهٔ کاملِ چندسازواره؛ نسخهٔ قدیمی به‌عنوانِ پشتیبان
+        var masire_ahang := "res://assets/audio/music_nfs.ogg"
+        if not ResourceLoader.exists(masire_ahang):
+                masire_ahang = "res://assets/audio/music_loop.ogg"
         if ResourceLoader.exists(masire_ahang):
                 pakhsh_ahang.stream = load(masire_ahang)
                 if pakhsh_ahang.stream is AudioStreamOggVorbis:
@@ -35,7 +38,11 @@ func _ready() -> void:
         pakhsh_vizhe.volume_db = -5.0
         add_child(pakhsh_vizhe)
         pakhsh_motor = AudioStreamPlayer.new()
-        pakhsh_motor.stream = load("res://assets/audio/engine.wav")
+        # غرشِ موتورِ جدید — لوپِ بی‌درزِ چندموجی؛ قدیمی پشتیبان
+        var masire_motor := "res://assets/audio/motor_nfs.wav"
+        if not ResourceLoader.exists(masire_motor):
+                masire_motor = "res://assets/audio/engine.wav"
+        pakhsh_motor.stream = load(masire_motor)
         # لوپ بی‌درز موتور — اگر یک‌بار مکث شنیده شود حس رباتیک می‌دهد
         var jaryan_motor := pakhsh_motor.stream as AudioStreamWAV
         if jaryan_motor != null:

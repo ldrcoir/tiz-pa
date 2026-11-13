@@ -145,6 +145,12 @@ var id_fermane_lamsi := -1
 var x0_fermane_lamsi := 0.0
 var meghdare_fermane_lamsi := 0.0
 var sh_dokmeha := {}                 # نام دکمه → index لمس
+var joy_kontorol: Control = null     # جوی‌استیکِ رویِ صفحه — پایه + دسته‌گردان
+
+# ویبرهٔ کوتاهِ بازخورد — رویِ گوشی واقعی می‌لرزد، رویِ دسکتاپ بی‌اثر است
+func _lerze(milisani: int) -> void:
+        if OS.has_feature("android"):
+                Input.vibrate_handheld(milisani)
 var ja_qabli := Vector3.ZERO        # جای قبلی ماشین — برای زیرگامِ تصادم
 var zaman_gir := 0.0                # چند ثانیه است که پشت مانع گیر کرده
 var dar_gir := false                # حالت برگشت خودکار
@@ -1704,13 +1710,17 @@ func _loft_bede(st: SurfaceTool, halqeha: Array, sar_bastan := true) -> void:
 var _sahne_glb: PackedScene = null
 var _bafte_pelak: Texture2D = null
 
-func _sahne_mashin() -> PackedScene:
-        if _sahne_glb == null and ResourceLoader.exists("res://assets/models/tizpa.glb"):
-                _sahne_glb = load("res://assets/models/tizpa.glb")
-        return _sahne_glb
+func _sahne_mashin(kind := "sport") -> PackedScene:
+        # مدل‌های سه‌بعدیِ اسپرتِ سبکِ NFS — اول مدلِ تازه، بعد سدانِ قدیمی
+        var masir_jadid := "res://assets/models/mashin_supercar.glb" if kind == "supercar" else "res://assets/models/mashin_sport.glb"
+        if ResourceLoader.exists(masir_jadid):
+                return load(masir_jadid)
+        if ResourceLoader.exists("res://assets/models/tizpa.glb"):
+                return load("res://assets/models/tizpa.glb")
+        return null
 
 func _mashin_besaz(rang: Color, kind := "sport", with_driver := false) -> Dictionary:
-        var sahne := _sahne_mashin()
+        var sahne := _sahne_mashin(kind)
         if sahne != null:
                 return _mashin_az_glb(sahne, rang, with_driver)
         # اگر مدل بلندر نبود — سازنده‌ی قدیمی هست تا بازی هیچ‌وقت نشکند
@@ -1751,7 +1761,7 @@ func _mashin_az_glb(sahne: PackedScene, rang: Color, with_driver: bool) -> Dicti
         shole.mesh = makute
         shole.material_override = fm
         shole.rotation_degrees = Vector3(-90, 0, 0)
-        shole.position = Vector3(-0.48, 0.30, -2.42)
+        shole.position = Vector3(-0.42, 0.30, -2.50)
         shole.visible = false
         rishe.add_child(shole)
         khoruj["flame"] = shole
@@ -1769,7 +1779,7 @@ func _pelak_bede(rishe: Node3D) -> void:
         m.roughness = 0.45
         m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
         var shomare_pelak := 0
-        for qarar in [Vector3(0, 0.44, 2.335), Vector3(0, 0.52, -2.34)]:
+        for qarar in [Vector3(0, 0.36, 2.345), Vector3(0, 0.44, -2.355)]:
                 var q := QuadMesh.new()
                 q.size = Vector2(0.50, 0.106)
                 q.material = m
@@ -1785,7 +1795,7 @@ func _ranande_bedeh(rishe: Node3D) -> void:
         # راننده — هلیا با مقنعه، پشت فرمان؛ از شیشه‌ی دودی سیلوئتش پیداست
         var ranande := Node3D.new()
         rishe.add_child(ranande)
-        ranande.position = Vector3(0, 0.58, 0.28)
+        ranande.position = Vector3(0, 0.56, -0.10)
         var sar := SphereMesh.new()
         sar.radius = 0.12
         sar.height = 0.24
@@ -2117,7 +2127,7 @@ func _mashin_bepar() -> void:
         mashin.add_child(dood)
         # رقیب‌ها — جلوی بازیکن گرید می‌شوند (سبک NFS)
         for r in 3:
-                var rr := _mashin_besaz(RANG_RAQIBHA[r % RANG_RAQIBHA.size()], "sport", false)
+                var rr := _mashin_besaz(RANG_RAQIBHA[r % RANG_RAQIBHA.size()], "supercar" if r % 2 == 0 else "sport", false)
                 add_child(rr["root"])
                 _saye_zir(rr["root"])
                 raqibha.append({"root": rr["root"], "wheels": rr["wheels"], "s": 10.0 + 6.0 * r,
@@ -2989,16 +2999,7 @@ func _dokmehaye_lamsi_besaz() -> void:
                         halqe.draw_circle(c2, z["r"], Color(0.04, 0.05, 0.08, 0.55))
                         halqe.draw_arc(c2, z["r"] - 2.0, 0.0, TAU, 40, Color(0.96, 0.76, 0.25, 0.75), 3.0)
                         halqe.draw_circle(c2, z["r"] * 0.82, z["col"])
-                        if nam == "chap" or nam == "rast":
-                                # فلش پهن — بدون فونت، با مثلث
-                                var samte: float = -1.0 if nam == "chap" else 1.0
-                                var nowghat := PackedVector2Array([
-                                        c2 + Vector2(-samte * 16.0, -22.0),
-                                        c2 + Vector2(-samte * 16.0, 22.0),
-                                        c2 + Vector2(samte * 20.0, 0.0),
-                                ])
-                                halqe.draw_colored_polygon(nowghat, Color(1, 1, 1, 0.92))
-                        elif fnt_dokme != null:
+                        if fnt_dokme != null:
                                 halqe.draw_string(fnt_dokme, Vector2(6, z["r"] + 8), z["label"], HORIZONTAL_ALIGNMENT_CENTER, z["r"] * 2 - 12, 20, Color(1, 1, 1, 0.95)))
                 halqe.mouse_filter = Control.MOUSE_FILTER_IGNORE
                 hud.add_child(halqe)
@@ -3018,6 +3019,31 @@ func _dokmehaye_lamsi_besaz() -> void:
         eshare_gaz.mouse_filter = Control.MOUSE_FILTER_IGNORE
         hud.add_child(eshare_gaz)
 
+        # ── جوی‌استیکِ فرمان — پایه‌ی ثابت + دسته‌گردانِ انالوگ ──
+        var j: Dictionary = zoonha["joy"]
+        joy_kontorol = Control.new()
+        joy_kontorol.position = j["pos"] - Vector2(j["r"], j["r"])
+        joy_kontorol.size = Vector2(j["r"] * 2, j["r"] * 2)
+        joy_kontorol.draw.connect(func():
+                var c2 := Vector2(j["r"], j["r"])
+                # پایه‌ی نیمه‌شفاف + حلقه‌ی طلاییِ مسابقه‌ای
+                joy_kontorol.draw_circle(c2, j["r"], Color(0.04, 0.05, 0.08, 0.42))
+                joy_kontorol.draw_arc(c2, j["r"] - 2.0, 0.0, TAU, 48, Color(0.96, 0.76, 0.25, 0.80), 3.0)
+                joy_kontorol.draw_arc(c2, j["r"] * 0.62, 0.0, TAU, 40, Color(1, 1, 1, 0.13), 2.0)
+                # چهار جهتِ راهنما
+                for sam in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+                        joy_kontorol.draw_line(c2 + sam * j["r"] * 0.66, c2 + sam * j["r"] * 0.82, Color(1, 1, 1, 0.30), 3.0)
+                # دسته‌گردان — با فرمانِ جاری جابه‌جا می‌شود
+                var kh: float = meghdare_fermane_lamsi * j["r"] * 0.58
+                var ja_daste := c2 + Vector2(kh, 0)
+                joy_kontorol.draw_circle(ja_daste, j["r"] * 0.30, Color(1, 1, 1, 0.16))
+                joy_kontorol.draw_circle(ja_daste, j["r"] * 0.26, Color(0.96, 0.76, 0.25, 0.92))
+                # برچسبِ کوچکِ زیرِ پایه
+                if fnt_dokme != null:
+                        joy_kontorol.draw_string(fnt_dokme, Vector2(6, j["r"] * 2 - 10), "فرمان", HORIZONTAL_ALIGNMENT_CENTER, j["r"] * 2 - 12, 17, Color(1, 1, 1, 0.70)))
+        joy_kontorol.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        hud.add_child(joy_kontorol)
+
 # جای دکمه‌ها — هم رسم و هم برخورد لمس از همین یک منبع می‌خوانند
 # روی هر گوشی‌ای با هر نسبت تصویر، دکمه‌ها داخل کادر می‌مانند — اندازه‌ها از ابعاد واقعی صفحه می‌آیند
 func _zoonha() -> Dictionary:
@@ -3028,15 +3054,16 @@ func _zoonha() -> Dictionary:
         var labe := clampf(H * 0.055, 22.0, 46.0)          # فاصله از لبه‌ی پایین
         var kenar := clampf(W * 0.045, 60.0, 200.0)        # فاصله از لبه‌های چپ/راست
         var y_paeen := H - labe - r_asli
-        var x_chap := kenar + r_asli
+        var r_joy := clampf(H * 0.150, 78.0, 132.0)        # جوی‌استیکِ بزرگ — انالوگِ واقعی
+        var x_joy := kenar + r_joy
+        var y_joy := H - labe - r_joy
         var x_gaz := W - kenar - r_asli
         return {
                 "gaz": {"pos": Vector2(x_gaz, y_paeen), "r": r_asli * 1.12, "col": Color(0.15, 0.75, 0.25, 0.60), "label": "گاز"},
                 "brake": {"pos": Vector2(x_gaz - r_asli * 2.15, H - labe - r_asli * 0.55), "r": r_asli * 0.78, "col": Color(0.2, 0.2, 0.25, 0.55), "label": "ترمز"},
                 "nitro": {"pos": Vector2(x_gaz - r_asli * 1.95, y_paeen - r_asli * 1.9), "r": r_asli * 0.92, "col": Color(0.2, 0.5, 0.95, 0.60), "label": "نیترو"},
                 "hb": {"pos": Vector2(x_gaz, y_paeen - r_asli * 2.45), "r": r_asli * 0.85, "col": Color(0.9, 0.3, 0.2, 0.55), "label": "دستی"},
-                "chap": {"pos": Vector2(x_chap, y_paeen), "r": r_asli * 1.05, "col": Color(0.35, 0.45, 0.6, 0.60), "label": ""},
-                "rast": {"pos": Vector2(x_chap + r_asli * 2.35, y_paeen), "r": r_asli * 1.05, "col": Color(0.35, 0.45, 0.6, 0.60), "label": ""},
+                "joy": {"pos": Vector2(x_joy, y_joy), "r": r_joy, "col": Color(0.35, 0.45, 0.6, 0.60), "label": "فرمان"},
         }
 
 # ═══════════════════ ورودی ═══════════════════
@@ -3047,20 +3074,28 @@ func _input(event: InputEvent) -> void:
                 var t := event as InputEventScreenTouch
                 if t.pressed:
                         var zn := _mantaghe_dar(t.position)
-                        if zn == "chap" or zn == "rast" or zn != "":
-                                # همه‌ی دکمه‌ها ناحیه‌ای مشخص دارند؛ کشیدن آزاد فقط وقتی روی هیچ دکمه‌ای نیستی
-                                if zn != "":
-                                        sh_dokmeha[zn] = t.index
-                                        if zn == "nitro":
-                                                nitro_rushan = true
-                                        elif zn == "hb":
-                                                dasti = true
-                                        elif zn == "brake":
-                                                paye_termoz = true
-                                        elif zn == "gaz":
-                                                gaz_feshorde = true
-                                        return
-                        if t.position.x < 430 and id_fermane_lamsi == -1:
+                        if zn == "joy":
+                                # گرفتنِ جوی‌استیک — از همین‌جا به هر سو بکش
+                                if id_fermane_lamsi == -1:
+                                        id_fermane_lamsi = t.index
+                                        x0_fermane_lamsi = t.position.x
+                                        meghdare_fermane_lamsi = 0.0
+                                return
+                        if zn != "":
+                                # همه‌ی دکمه‌ها ناحیه‌ی مشخص دارند
+                                sh_dokmeha[zn] = t.index
+                                if zn == "nitro":
+                                        nitro_rushan = true
+                                        _lerze(60)
+                                elif zn == "hb":
+                                        dasti = true
+                                elif zn == "brake":
+                                        paye_termoz = true
+                                elif zn == "gaz":
+                                        gaz_feshorde = true
+                                return
+                        # لمسِ هر جای دیگر در مسابقه = فرمانِ کششی — دستِ چپ آزاد است
+                        if id_fermane_lamsi == -1 and halat == "race":
                                 id_fermane_lamsi = t.index
                                 x0_fermane_lamsi = t.position.x
                                 meghdare_fermane_lamsi = 0.0
@@ -3083,7 +3118,9 @@ func _input(event: InputEvent) -> void:
         elif event is InputEventScreenDrag:
                 var d := event as InputEventScreenDrag
                 if d.index == id_fermane_lamsi:
-                        meghdare_fermane_lamsi = clampf((d.position.x - x0_fermane_lamsi) / 160.0, -1.0, 1.0)
+                        # شعاعِ جوی‌استیک = مسِ انالوگ؛ هرچه بزرگ‌تر، فرمان دقیق‌تر
+                        var shoa: float = _zoonha()["joy"]["r"] * 0.80
+                        meghdare_fermane_lamsi = clampf((d.position.x - x0_fermane_lamsi) / shoa, -1.0, 1.0)
         # کیبورد برای تست دسکتاپ
         if event is InputEventKey and event.pressed:
                 if event.keycode == KEY_SPACE:
@@ -3159,9 +3196,12 @@ func _process(dt: float) -> void:
 
 func _voroode_mosabeqe() -> void:
         var ks := _ferman_kibord()
-        # فرمان = کشیدن انگشت + کلید + دکمه‌های چپ/راست
-        fermane_dokme = (1.0 if sh_dokmeha.has("rast") else 0.0) - (1.0 if sh_dokmeha.has("chap") else 0.0)
-        mizane_ferman = clampf(ks + meghdare_fermane_lamsi + fermane_dokme, -1.0, 1.0)
+        # فرمان = جوی‌استیکِ انالوگ (با منطقه‌ی مرده) + کلید
+        var magh_lamsi := 0.0
+        if absf(meghdare_fermane_lamsi) > 0.07:
+                magh_lamsi = (meghdare_fermane_lamsi - signf(meghdare_fermane_lamsi) * 0.07) / 0.93
+        fermane_dokme = 0.0
+        mizane_ferman = clampf(ks + magh_lamsi + fermane_dokme, -1.0, 1.0)
         if halat == "finish":
                 paye_gaz = 0.35
                 dasti = false
@@ -3180,6 +3220,8 @@ func _voroode_mosabeqe() -> void:
 func _hasteye_hud() -> void:
         if sanje_hud:
                 sanje_hud.queue_redraw()
+        if joy_kontorol != null:
+                joy_kontorol.queue_redraw()   # دسته‌ی جوی‌استیک هر فریم جابه‌جا شود
         if sharge_nitro:
                 sharge_nitro.size.y = 176.0 * nitro
                 sharge_nitro.position.y = 180.0 - 176.0 * nitro
